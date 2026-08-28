@@ -1,0 +1,6 @@
+@ProCredit.Api_HostAddress = http://localhost:5022
+
+GET {{ProCredit.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

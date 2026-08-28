@@ -8,7 +8,7 @@ Desarrollo guiado por especificación (Specification-Driven Development): la fue
 
 ```
 procredit-employee-management/
-├── docs/         Especificaciones y documentación (PROBLEM.md)
+├── docs/         Especificaciones y documentación (PROBLEM.md, SPEC.md, PLAN.md)
 ├── database/     Base de datos SQL Server (tablas, relaciones, stored procedure)
 ├── backend/      API Rest en C# con .NET 10, arquitectura en capas
 ├── frontend/     Aplicación React 19
@@ -19,7 +19,8 @@ procredit-employee-management/
 ## Estado
 
 - [x] `docs/PROBLEM.md` — análisis del reto (contexto, requisitos, entidades, criterios de aceptación, ambigüedades)
-- [ ] Diseño de la solución
+- [x] `docs/SPEC.md` — especificación (modelo de datos, contratos de API, pantallas)
+- [x] `docs/PLAN.md` — plan de implementación por fases
 - [ ] `database/`
 - [ ] `backend/`
 - [ ] `frontend/`

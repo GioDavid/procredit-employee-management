@@ -21,6 +21,6 @@ procredit-employee-management/
 - [x] `docs/PROBLEM.md` — análisis del reto (contexto, requisitos, entidades, criterios de aceptación, ambigüedades)
 - [x] `docs/SPEC.md` — especificación (modelo de datos, contratos de API, pantallas)
 - [x] `docs/PLAN.md` — plan de implementación por fases
-- [ ] `database/`
+- [x] `database/` — scripts SQL Server (tablas, FKs, `usp_Empleado_Consultar`, semilla)
 - [ ] `backend/`
 - [ ] `frontend/`

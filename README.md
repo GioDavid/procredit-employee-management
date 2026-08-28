@@ -22,5 +22,5 @@ procredit-employee-management/
 - [x] `docs/SPEC.md` — especificación (modelo de datos, contratos de API, pantallas)
 - [x] `docs/PLAN.md` — plan de implementación por fases
 - [x] `database/` — scripts SQL Server (tablas, FKs, `usp_Empleado_Consultar`, semilla)
-- [ ] `backend/`
+- [x] `backend/` — API REST .NET 10 en capas (JWT, listado, búsqueda, alta)
 - [ ] `frontend/`

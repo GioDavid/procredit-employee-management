@@ -2,8 +2,8 @@ import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Catalog } from "../interfaces/Catalog";
-import type { Empleado } from "../interfaces/Empleado";
-import { getDepartamentos } from "../services/catalogService";
+import type { Employee } from "../interfaces/Employee";
+import { getDepartments } from "../services/catalogService";
 import { listEmployees } from "../services/employeeService";
 import { EmployeesPage } from "./EmployeesPage";
 
@@ -12,8 +12,8 @@ vi.mock("../services/authService", () => ({
 }));
 
 vi.mock("../services/catalogService", () => ({
-  getDepartamentos: vi.fn(),
-  getCargos: vi.fn(),
+  getDepartments: vi.fn(),
+  getPositions: vi.fn(),
 }));
 
 vi.mock("../services/employeeService", () => ({
@@ -22,24 +22,24 @@ vi.mock("../services/employeeService", () => ({
 }));
 
 const listEmployeesMock = vi.mocked(listEmployees);
-const getDepartamentosMock = vi.mocked(getDepartamentos);
+const getDepartmentsMock = vi.mocked(getDepartments);
 
-const departamentos: Catalog[] = [
-  { id: 1, nombre: "Sistemas" },
-  { id: 2, nombre: "Legal" },
+const departments: Catalog[] = [
+  { id: 1, name: "Sistemas" },
+  { id: 2, name: "Legal" },
 ];
 
-const empleado: Empleado = {
-  empleadoId: 1,
-  numeroDocumento: "12345678",
-  nombres: "Ana",
-  apellidos: "García",
-  edad: 30,
-  remuneracionMensual: 2500000,
-  departamentoId: 1,
-  departamento: "Sistemas",
-  cargoId: 1,
-  cargo: "Analista",
+const employee: Employee = {
+  employeeId: 1,
+  documentNumber: "12345678",
+  firstNames: "Ana",
+  lastNames: "García",
+  age: 30,
+  monthlySalary: 2500000,
+  departmentId: 1,
+  department: "Sistemas",
+  positionId: 1,
+  position: "Analista",
 };
 
 function deferred<T>() {
@@ -56,12 +56,12 @@ describe("EmployeesPage", () => {
   beforeEach(() => {
     onLogout.mockReset();
     listEmployeesMock.mockReset();
-    getDepartamentosMock.mockReset();
-    getDepartamentosMock.mockResolvedValue(departamentos);
+    getDepartmentsMock.mockReset();
+    getDepartmentsMock.mockResolvedValue(departments);
   });
 
   it("loads and renders employees on mount", async () => {
-    listEmployeesMock.mockResolvedValue([empleado]);
+    listEmployeesMock.mockResolvedValue([employee]);
     render(<EmployeesPage onLogout={onLogout} />);
 
     expect(listEmployeesMock).toHaveBeenCalledWith(undefined);
@@ -86,14 +86,14 @@ describe("EmployeesPage", () => {
   });
 
   it("shows a progress indicator and hides the table while loading", async () => {
-    const { promise, resolve } = deferred<Empleado[]>();
+    const { promise, resolve } = deferred<Employee[]>();
     listEmployeesMock.mockReturnValue(promise);
     render(<EmployeesPage onLogout={onLogout} />);
 
     expect(screen.getByRole("progressbar")).toBeInTheDocument();
     expect(screen.queryByRole("table")).not.toBeInTheDocument();
 
-    resolve([empleado]);
+    resolve([employee]);
     expect(await screen.findByRole("table")).toBeInTheDocument();
   });
 
@@ -118,9 +118,9 @@ describe("EmployeesPage", () => {
     expect(screen.queryByRole("table")).not.toBeInTheDocument();
   });
 
-  it("filters the list by departamento name and restores all with Todos", async () => {
+  it("filters the list by department name and restores all with Todos", async () => {
     const user = userEvent.setup();
-    listEmployeesMock.mockResolvedValue([empleado]);
+    listEmployeesMock.mockResolvedValue([employee]);
     render(<EmployeesPage onLogout={onLogout} />);
 
     await screen.findByRole("table");

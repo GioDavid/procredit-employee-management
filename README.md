@@ -230,6 +230,8 @@ ProCreditRRHH
 
 junto con sus tablas, relaciones, stored procedures y datos iniciales.
 
+Si existe un esquema anterior con nombres en español (`Departamento`, `Cargo`, `Empleado`), hay que eliminar y recrear la base de datos. No hay migración in-place.
+
 ### Verificar la base de datos
 
 ```bash
@@ -309,10 +311,10 @@ Ejemplo:
 ```text
 ConnectionStrings__ProCreditRRHH=Server=localhost,1433;Database=ProCreditRRHH;User Id=sa;Password=<YOUR_SQL_PASSWORD>;TrustServerCertificate=True;Encrypt=True;
 
-UsuarioPrueba__Usuario=admin
-UsuarioPrueba__Clave=<YOUR_TEST_USER_PASSWORD>
+TestUser__Username=admin
+TestUser__Password=<YOUR_TEST_USER_PASSWORD>
 
-Jwt__ClaveSecreta=<YOUR_RANDOM_JWT_SECRET>
+Jwt__SecretKey=<YOUR_RANDOM_JWT_SECRET>
 ```
 
 Para generar una clave JWT aleatoria:
@@ -336,9 +338,9 @@ set -a && source .env && set +a
 También es posible configurar las variables directamente desde la terminal:
 
 ```bash
-export UsuarioPrueba__Clave='<YOUR_TEST_USER_PASSWORD>'
+export TestUser__Password='<YOUR_TEST_USER_PASSWORD>'
 
-export Jwt__ClaveSecreta="$(openssl rand -base64 48)"
+export Jwt__SecretKey="$(openssl rand -base64 48)"
 
 export ConnectionStrings__ProCreditRRHH='Server=localhost,1433;Database=ProCreditRRHH;User Id=sa;Password=<YOUR_SQL_PASSWORD>;TrustServerCertificate=True;'
 ```
@@ -373,7 +375,7 @@ Configurar la contraseña del usuario de prueba:
 
 ```bash
 dotnet user-secrets set \
-  "UsuarioPrueba:Clave" \
+  "TestUser:Password" \
   "<YOUR_TEST_USER_PASSWORD>"
 ```
 
@@ -381,7 +383,7 @@ Configurar la clave JWT:
 
 ```bash
 dotnet user-secrets set \
-  "Jwt:ClaveSecreta" \
+  "Jwt:SecretKey" \
   "<YOUR_RANDOM_JWT_SECRET>"
 ```
 
@@ -447,9 +449,9 @@ backend/src/ProCredit.Api/appsettings.json
 | Clave | Descripción |
 |---|---|
 | `ConnectionStrings:ProCreditRRHH` | Cadena de conexión a SQL Server. El valor sensible se proporciona localmente. |
-| `UsuarioPrueba` | Usuario de prueba preconfigurado. |
+| `TestUser` | Usuario de prueba preconfigurado. |
 | `Jwt` | Issuer, Audience, tiempo de expiración y configuración JWT. |
-| `Cors:OrigenesPermitidos` | Orígenes permitidos para el frontend. |
+| `Cors:AllowedOrigins` | Orígenes permitidos para el frontend. |
 
 El origen esperado del frontend durante desarrollo es:
 
@@ -476,7 +478,7 @@ admin
 La contraseña corresponde al valor configurado localmente en:
 
 ```text
-UsuarioPrueba__Clave
+TestUser__Password
 ```
 
 El endpoint:
@@ -489,8 +491,8 @@ recibe:
 
 ```json
 {
-  "usuario": "admin",
-  "clave": "<YOUR_TEST_USER_PASSWORD>"
+  "username": "admin",
+  "password": "<YOUR_TEST_USER_PASSWORD>"
 }
 ```
 
@@ -499,7 +501,7 @@ y devuelve:
 ```json
 {
   "token": "<JWT>",
-  "expiraEn": "<EXPIRATION_DATE>"
+  "expiresAt": "<EXPIRATION_DATE>"
 }
 ```
 
@@ -515,13 +517,13 @@ Authorization: Bearer <JWT>
 
 | Método | Ruta | Auth | Descripción |
 |---|---|---|---|
-| `POST` | `/api/auth/login` | No | Autenticación. Devuelve `{ token, expiraEn }`. |
-| `GET` | `/api/empleados` | Bearer | Lista todos los empleados. |
-| `GET` | `/api/empleados?departamento=banca` | Bearer | Filtra empleados por coincidencia parcial del departamento. |
-| `GET` | `/api/empleados/{id}` | Bearer | Obtiene un empleado por ID. |
-| `POST` | `/api/empleados` | Bearer | Registra un nuevo empleado. |
-| `GET` | `/api/departamentos` | Bearer | Obtiene el catálogo de departamentos. |
-| `GET` | `/api/cargos` | Bearer | Obtiene el catálogo de cargos. |
+| `POST` | `/api/auth/login` | No | Autenticación. Devuelve `{ token, expiresAt }`. |
+| `GET` | `/api/employees` | Bearer | Lista todos los empleados. |
+| `GET` | `/api/employees?department=banca` | Bearer | Filtra empleados por coincidencia parcial del departamento. |
+| `GET` | `/api/employees/{id}` | Bearer | Obtiene un empleado por ID. |
+| `POST` | `/api/employees` | Bearer | Registra un nuevo empleado. |
+| `GET` | `/api/departments` | Bearer | Obtiene el catálogo de departamentos. |
+| `GET` | `/api/positions` | Bearer | Obtiene el catálogo de cargos. |
 
 La creación de empleados puede devolver:
 
@@ -542,7 +544,7 @@ Con la API ejecutándose:
 ```bash
 TOKEN=$(curl -s -X POST http://localhost:<PORT>/api/auth/login \
   -H 'Content-Type: application/json' \
-  -d "{\"usuario\":\"$UsuarioPrueba__Usuario\",\"clave\":\"$UsuarioPrueba__Clave\"}" \
+  -d "{\"username\":\"$TestUser__Username\",\"password\":\"$TestUser__Password\"}" \
   | jq -r .token)
 ```
 
@@ -551,7 +553,7 @@ Consultar empleados:
 ```bash
 curl \
   -H "Authorization: Bearer $TOKEN" \
-  "http://localhost:<PORT>/api/empleados"
+  "http://localhost:<PORT>/api/employees"
 ```
 
 Filtrar por departamento:
@@ -559,7 +561,7 @@ Filtrar por departamento:
 ```bash
 curl \
   -H "Authorization: Bearer $TOKEN" \
-  "http://localhost:<PORT>/api/empleados?departamento=banca"
+  "http://localhost:<PORT>/api/employees?department=banca"
 ```
 
 ---
@@ -652,7 +654,7 @@ Password: <YOUR_TEST_USER_PASSWORD>
 La contraseña debe coincidir con:
 
 ```text
-UsuarioPrueba__Clave
+TestUser__Password
 ```
 
 Después de autenticarse, el frontend utiliza automáticamente el JWT para consumir los endpoints protegidos.
@@ -669,8 +671,8 @@ React 19
 localhost:5173
    │
    │ POST /api/auth/login
-   │ GET  /api/empleados
-   │ POST /api/empleados
+   │ GET  /api/employees
+   │ POST /api/employees
    │
    │ Authorization: Bearer JWT
    ▼

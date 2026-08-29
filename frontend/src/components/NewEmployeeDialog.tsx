@@ -16,7 +16,7 @@ import TextField from "@mui/material/TextField";
 import { ApiError } from "../api/client";
 import type { Catalog } from "../interfaces/Catalog";
 import type { CreateEmployeeRequest } from "../interfaces/CreateEmployeeRequest";
-import { getCargos, getDepartamentos } from "../services/catalogService";
+import { getDepartments, getPositions } from "../services/catalogService";
 import { createEmployee } from "../services/employeeService";
 
 type NewEmployeeDialogProps = {
@@ -28,13 +28,13 @@ type NewEmployeeDialogProps = {
 type FormErrors = Partial<Record<keyof CreateEmployeeRequest, string>>;
 
 const emptyForm = {
-  numeroDocumento: "",
-  nombres: "",
-  apellidos: "",
-  edad: "",
-  remuneracionMensual: "",
-  departamentoId: "",
-  cargoId: "",
+  documentNumber: "",
+  firstNames: "",
+  lastNames: "",
+  age: "",
+  monthlySalary: "",
+  departmentId: "",
+  positionId: "",
 };
 
 export function NewEmployeeDialog({
@@ -44,8 +44,8 @@ export function NewEmployeeDialog({
 }: NewEmployeeDialogProps) {
   const [form, setForm] = useState(emptyForm);
   const [errors, setErrors] = useState<FormErrors>({});
-  const [departamentos, setDepartamentos] = useState<Catalog[]>([]);
-  const [cargos, setCargos] = useState<Catalog[]>([]);
+  const [departments, setDepartments] = useState<Catalog[]>([]);
+  const [positions, setPositions] = useState<Catalog[]>([]);
   const [catalogError, setCatalogError] = useState("");
   const [submitError, setSubmitError] = useState("");
   const [loadingCatalogs, setLoadingCatalogs] = useState(false);
@@ -58,13 +58,13 @@ export function NewEmployeeDialog({
 
     let cancelled = false;
 
-    Promise.all([getDepartamentos(), getCargos()])
-      .then(([deps, cargosList]) => {
+    Promise.all([getDepartments(), getPositions()])
+      .then(([deps, positionsList]) => {
         if (cancelled) {
           return;
         }
-        setDepartamentos(deps);
-        setCargos(cargosList);
+        setDepartments(deps);
+        setPositions(positionsList);
       })
       .catch((err: unknown) => {
         if (cancelled || (err instanceof ApiError && err.status === 401)) {
@@ -96,38 +96,38 @@ export function NewEmployeeDialog({
 
   function validate(): CreateEmployeeRequest | null {
     const nextErrors: FormErrors = {};
-    const numeroDocumento = form.numeroDocumento.trim();
-    const nombres = form.nombres.trim();
-    const apellidos = form.apellidos.trim();
-    const edad = Number(form.edad);
-    const remuneracionMensual = Number(form.remuneracionMensual);
-    const departamentoId = Number(form.departamentoId);
-    const cargoId = Number(form.cargoId);
+    const documentNumber = form.documentNumber.trim();
+    const firstNames = form.firstNames.trim();
+    const lastNames = form.lastNames.trim();
+    const age = Number(form.age);
+    const monthlySalary = Number(form.monthlySalary);
+    const departmentId = Number(form.departmentId);
+    const positionId = Number(form.positionId);
 
-    if (numeroDocumento.length < 6 || numeroDocumento.length > 20) {
-      nextErrors.numeroDocumento = "Debe tener entre 6 y 20 caracteres.";
+    if (documentNumber.length < 6 || documentNumber.length > 20) {
+      nextErrors.documentNumber = "Debe tener entre 6 y 20 caracteres.";
     }
-    if (!nombres) {
-      nextErrors.nombres = "Los nombres son requeridos.";
-    } else if (nombres.length > 100) {
-      nextErrors.nombres = "Máximo 100 caracteres.";
+    if (!firstNames) {
+      nextErrors.firstNames = "Los nombres son requeridos.";
+    } else if (firstNames.length > 100) {
+      nextErrors.firstNames = "Máximo 100 caracteres.";
     }
-    if (!apellidos) {
-      nextErrors.apellidos = "Los apellidos son requeridos.";
-    } else if (apellidos.length > 100) {
-      nextErrors.apellidos = "Máximo 100 caracteres.";
+    if (!lastNames) {
+      nextErrors.lastNames = "Los apellidos son requeridos.";
+    } else if (lastNames.length > 100) {
+      nextErrors.lastNames = "Máximo 100 caracteres.";
     }
-    if (!Number.isInteger(edad) || edad < 18 || edad > 100) {
-      nextErrors.edad = "La edad debe estar entre 18 y 100.";
+    if (!Number.isInteger(age) || age < 18 || age > 100) {
+      nextErrors.age = "La edad debe estar entre 18 y 100.";
     }
-    if (!(remuneracionMensual > 0)) {
-      nextErrors.remuneracionMensual = "La remuneración debe ser mayor que 0.";
+    if (!(monthlySalary > 0)) {
+      nextErrors.monthlySalary = "La remuneración debe ser mayor que 0.";
     }
-    if (!Number.isInteger(departamentoId) || departamentoId < 1) {
-      nextErrors.departamentoId = "Seleccione un departamento.";
+    if (!Number.isInteger(departmentId) || departmentId < 1) {
+      nextErrors.departmentId = "Seleccione un departamento.";
     }
-    if (!Number.isInteger(cargoId) || cargoId < 1) {
-      nextErrors.cargoId = "Seleccione un cargo.";
+    if (!Number.isInteger(positionId) || positionId < 1) {
+      nextErrors.positionId = "Seleccione un cargo.";
     }
 
     setErrors(nextErrors);
@@ -136,13 +136,13 @@ export function NewEmployeeDialog({
     }
 
     return {
-      numeroDocumento,
-      nombres,
-      apellidos,
-      edad,
-      remuneracionMensual,
-      departamentoId,
-      cargoId,
+      documentNumber,
+      firstNames,
+      lastNames,
+      age,
+      monthlySalary,
+      departmentId,
+      positionId,
     };
   }
 
@@ -200,12 +200,12 @@ export function NewEmployeeDialog({
 
           <TextField
             label="Número de documento"
-            value={form.numeroDocumento}
+            value={form.documentNumber}
             onChange={(e) =>
-              setForm((prev) => ({ ...prev, numeroDocumento: e.target.value }))
+              setForm((prev) => ({ ...prev, documentNumber: e.target.value }))
             }
-            error={Boolean(errors.numeroDocumento)}
-            helperText={errors.numeroDocumento}
+            error={Boolean(errors.documentNumber)}
+            helperText={errors.documentNumber}
             fullWidth
             required
             margin="normal"
@@ -213,12 +213,12 @@ export function NewEmployeeDialog({
           />
           <TextField
             label="Nombres"
-            value={form.nombres}
+            value={form.firstNames}
             onChange={(e) =>
-              setForm((prev) => ({ ...prev, nombres: e.target.value }))
+              setForm((prev) => ({ ...prev, firstNames: e.target.value }))
             }
-            error={Boolean(errors.nombres)}
-            helperText={errors.nombres}
+            error={Boolean(errors.firstNames)}
+            helperText={errors.firstNames}
             fullWidth
             required
             margin="normal"
@@ -226,12 +226,12 @@ export function NewEmployeeDialog({
           />
           <TextField
             label="Apellidos"
-            value={form.apellidos}
+            value={form.lastNames}
             onChange={(e) =>
-              setForm((prev) => ({ ...prev, apellidos: e.target.value }))
+              setForm((prev) => ({ ...prev, lastNames: e.target.value }))
             }
-            error={Boolean(errors.apellidos)}
-            helperText={errors.apellidos}
+            error={Boolean(errors.lastNames)}
+            helperText={errors.lastNames}
             fullWidth
             required
             margin="normal"
@@ -240,12 +240,12 @@ export function NewEmployeeDialog({
           <TextField
             label="Edad"
             type="number"
-            value={form.edad}
+            value={form.age}
             onChange={(e) =>
-              setForm((prev) => ({ ...prev, edad: e.target.value }))
+              setForm((prev) => ({ ...prev, age: e.target.value }))
             }
-            error={Boolean(errors.edad)}
-            helperText={errors.edad}
+            error={Boolean(errors.age)}
+            helperText={errors.age}
             fullWidth
             required
             margin="normal"
@@ -255,15 +255,15 @@ export function NewEmployeeDialog({
           <TextField
             label="Remuneración mensual"
             type="number"
-            value={form.remuneracionMensual}
+            value={form.monthlySalary}
             onChange={(e) =>
               setForm((prev) => ({
                 ...prev,
-                remuneracionMensual: e.target.value,
+                monthlySalary: e.target.value,
               }))
             }
-            error={Boolean(errors.remuneracionMensual)}
-            helperText={errors.remuneracionMensual}
+            error={Boolean(errors.monthlySalary)}
+            helperText={errors.monthlySalary}
             fullWidth
             required
             margin="normal"
@@ -274,18 +274,18 @@ export function NewEmployeeDialog({
           <FormControl
             fullWidth
             margin="normal"
-            error={Boolean(errors.departamentoId)}
+            error={Boolean(errors.departmentId)}
             disabled={submitting}
           >
-            <InputLabel id="departamento-label">Departamento</InputLabel>
+            <InputLabel id="department-label">Departamento</InputLabel>
             <Select
-              labelId="departamento-label"
+              labelId="department-label"
               label="Departamento"
-              value={form.departamentoId}
+              value={form.departmentId}
               onChange={(e) =>
                 setForm((prev) => ({
                   ...prev,
-                  departamentoId: String(e.target.value),
+                  departmentId: String(e.target.value),
                 }))
               }
               displayEmpty
@@ -293,32 +293,32 @@ export function NewEmployeeDialog({
               <MenuItem value="">
                 <em>Seleccione…</em>
               </MenuItem>
-              {departamentos.map((dep) => (
+              {departments.map((dep) => (
                 <MenuItem key={dep.id} value={String(dep.id)}>
-                  {dep.nombre}
+                  {dep.name}
                 </MenuItem>
               ))}
             </Select>
-            {errors.departamentoId ? (
-              <FormHelperText>{errors.departamentoId}</FormHelperText>
+            {errors.departmentId ? (
+              <FormHelperText>{errors.departmentId}</FormHelperText>
             ) : null}
           </FormControl>
 
           <FormControl
             fullWidth
             margin="normal"
-            error={Boolean(errors.cargoId)}
+            error={Boolean(errors.positionId)}
             disabled={submitting}
           >
-            <InputLabel id="cargo-label">Cargo</InputLabel>
+            <InputLabel id="position-label">Cargo</InputLabel>
             <Select
-              labelId="cargo-label"
+              labelId="position-label"
               label="Cargo"
-              value={form.cargoId}
+              value={form.positionId}
               onChange={(e) =>
                 setForm((prev) => ({
                   ...prev,
-                  cargoId: String(e.target.value),
+                  positionId: String(e.target.value),
                 }))
               }
               displayEmpty
@@ -326,14 +326,14 @@ export function NewEmployeeDialog({
               <MenuItem value="">
                 <em>Seleccione…</em>
               </MenuItem>
-              {cargos.map((cargo) => (
-                <MenuItem key={cargo.id} value={String(cargo.id)}>
-                  {cargo.nombre}
+              {positions.map((position) => (
+                <MenuItem key={position.id} value={String(position.id)}>
+                  {position.name}
                 </MenuItem>
               ))}
             </Select>
-            {errors.cargoId ? (
-              <FormHelperText>{errors.cargoId}</FormHelperText>
+            {errors.positionId ? (
+              <FormHelperText>{errors.positionId}</FormHelperText>
             ) : null}
           </FormControl>
 

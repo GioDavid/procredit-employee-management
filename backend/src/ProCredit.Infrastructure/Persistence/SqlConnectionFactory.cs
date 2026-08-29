@@ -4,10 +4,10 @@ namespace ProCredit.Infrastructure.Persistence;
 
 public interface ISqlConnectionFactory
 {
-    SqlConnection Crear();
+    SqlConnection Create();
 }
 
 public sealed class SqlConnectionFactory(string connectionString) : ISqlConnectionFactory
 {
-    public SqlConnection Crear() => new(connectionString);
+    public SqlConnection Create() => new(connectionString);
 }

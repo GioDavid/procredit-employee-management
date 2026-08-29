@@ -12,11 +12,11 @@ public sealed class JwtTokenService(IOptions<JwtOptions> options) : ITokenServic
 {
     private readonly JwtOptions _jwt = options.Value;
 
-    public (string Token, DateTime ExpiraEn) Generar(string usuario)
+    public (string Token, DateTime ExpiresAt) Generate(string username)
     {
-        var expiraEn = DateTime.UtcNow.AddMinutes(_jwt.MinutosExpiracion);
-        var credenciales = new SigningCredentials(
-            new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwt.ClaveSecreta)),
+        var expiresAt = DateTime.UtcNow.AddMinutes(_jwt.ExpirationMinutes);
+        var credentials = new SigningCredentials(
+            new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwt.SecretKey)),
             SecurityAlgorithms.HmacSha256);
 
         var token = new JwtSecurityToken(
@@ -24,12 +24,12 @@ public sealed class JwtTokenService(IOptions<JwtOptions> options) : ITokenServic
             audience: _jwt.Audience,
             claims:
             [
-                new Claim(JwtRegisteredClaimNames.Sub, usuario),
+                new Claim(JwtRegisteredClaimNames.Sub, username),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             ],
-            expires: expiraEn,
-            signingCredentials: credenciales);
+            expires: expiresAt,
+            signingCredentials: credentials);
 
-        return (new JwtSecurityTokenHandler().WriteToken(token), expiraEn);
+        return (new JwtSecurityTokenHandler().WriteToken(token), expiresAt);
     }
 }

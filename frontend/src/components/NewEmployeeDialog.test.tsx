@@ -4,25 +4,25 @@ import type { UserEvent } from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ApiError } from "../api/client";
 import type { Catalog } from "../interfaces/Catalog";
-import { getCargos, getDepartamentos } from "../services/catalogService";
+import { getDepartments, getPositions } from "../services/catalogService";
 import { createEmployee } from "../services/employeeService";
 import { NewEmployeeDialog } from "./NewEmployeeDialog";
 
 vi.mock("../services/catalogService", () => ({
-  getDepartamentos: vi.fn(),
-  getCargos: vi.fn(),
+  getDepartments: vi.fn(),
+  getPositions: vi.fn(),
 }));
 
 vi.mock("../services/employeeService", () => ({
   createEmployee: vi.fn(),
 }));
 
-const getDepartamentosMock = vi.mocked(getDepartamentos);
-const getCargosMock = vi.mocked(getCargos);
+const getDepartmentsMock = vi.mocked(getDepartments);
+const getPositionsMock = vi.mocked(getPositions);
 const createEmployeeMock = vi.mocked(createEmployee);
 
-const departamentos: Catalog[] = [{ id: 1, nombre: "Sistemas" }];
-const cargos: Catalog[] = [{ id: 2, nombre: "Analista" }];
+const departments: Catalog[] = [{ id: 1, name: "Sistemas" }];
+const positions: Catalog[] = [{ id: 2, name: "Analista" }];
 
 async function fillValidForm(user: UserEvent) {
   await user.type(
@@ -48,22 +48,22 @@ describe("NewEmployeeDialog", () => {
   beforeEach(() => {
     onClose.mockReset();
     onCreated.mockReset();
-    getDepartamentosMock.mockReset();
-    getCargosMock.mockReset();
+    getDepartmentsMock.mockReset();
+    getPositionsMock.mockReset();
     createEmployeeMock.mockReset();
-    getDepartamentosMock.mockResolvedValue(departamentos);
-    getCargosMock.mockResolvedValue(cargos);
+    getDepartmentsMock.mockResolvedValue(departments);
+    getPositionsMock.mockResolvedValue(positions);
     createEmployeeMock.mockResolvedValue({
-      empleadoId: 1,
-      numeroDocumento: "12345678",
-      nombres: "Ana",
-      apellidos: "García",
-      edad: 30,
-      remuneracionMensual: 2500000,
-      departamentoId: 1,
-      departamento: "Sistemas",
-      cargoId: 2,
-      cargo: "Analista",
+      employeeId: 1,
+      documentNumber: "12345678",
+      firstNames: "Ana",
+      lastNames: "García",
+      age: 30,
+      monthlySalary: 2500000,
+      departmentId: 1,
+      department: "Sistemas",
+      positionId: 2,
+      position: "Analista",
     });
   });
 
@@ -97,8 +97,8 @@ describe("NewEmployeeDialog", () => {
     render(<NewEmployeeDialog open onClose={onClose} onCreated={onCreated} />);
 
     await waitFor(() => {
-      expect(getDepartamentosMock).toHaveBeenCalled();
-      expect(getCargosMock).toHaveBeenCalled();
+      expect(getDepartmentsMock).toHaveBeenCalled();
+      expect(getPositionsMock).toHaveBeenCalled();
     });
 
     await fillValidForm(user);
@@ -106,13 +106,13 @@ describe("NewEmployeeDialog", () => {
 
     await waitFor(() => {
       expect(createEmployeeMock).toHaveBeenCalledWith({
-        numeroDocumento: "12345678",
-        nombres: "Ana",
-        apellidos: "García",
-        edad: 30,
-        remuneracionMensual: 2500000,
-        departamentoId: 1,
-        cargoId: 2,
+        documentNumber: "12345678",
+        firstNames: "Ana",
+        lastNames: "García",
+        age: 30,
+        monthlySalary: 2500000,
+        departmentId: 1,
+        positionId: 2,
       });
     });
     expect(onCreated).toHaveBeenCalledTimes(1);
@@ -130,7 +130,7 @@ describe("NewEmployeeDialog", () => {
     render(<NewEmployeeDialog open onClose={onClose} onCreated={onCreated} />);
 
     await waitFor(() => {
-      expect(getDepartamentosMock).toHaveBeenCalled();
+      expect(getDepartmentsMock).toHaveBeenCalled();
     });
 
     await fillValidForm(user);

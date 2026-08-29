@@ -15,16 +15,16 @@ public static class DependencyInjection
         if (string.IsNullOrWhiteSpace(connectionString))
         {
             throw new InvalidOperationException(
-                "Falta la cadena de conexion 'ConnectionStrings__ProCreditRRHH'. Ver backend/.env.example.");
+                "Missing connection string 'ConnectionStrings__ProCreditRRHH'. See backend/.env.example.");
         }
 
-        services.Configure<UsuarioPruebaOptions>(configuration.GetSection(UsuarioPruebaOptions.SectionName));
+        services.Configure<TestUserOptions>(configuration.GetSection(TestUserOptions.SectionName));
         services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
 
         services.AddSingleton<ISqlConnectionFactory>(new SqlConnectionFactory(connectionString));
-        services.AddScoped<IEmpleadoRepository, EmpleadoRepository>();
-        services.AddScoped<ICatalogoRepository, CatalogoRepository>();
-        services.AddSingleton<IUsuarioAutenticador, UsuarioAutenticador>();
+        services.AddScoped<IEmployeeRepository, EmployeeRepository>();
+        services.AddScoped<ICatalogRepository, CatalogRepository>();
+        services.AddSingleton<IUserAuthenticator, UserAuthenticator>();
         services.AddSingleton<ITokenService, JwtTokenService>();
 
         return services;

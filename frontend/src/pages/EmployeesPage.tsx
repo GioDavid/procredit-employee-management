@@ -22,9 +22,9 @@ import Typography from "@mui/material/Typography";
 import { ApiError } from "../api/client";
 import { NewEmployeeDialog } from "../components/NewEmployeeDialog";
 import type { Catalog } from "../interfaces/Catalog";
-import type { Empleado } from "../interfaces/Empleado";
+import type { Employee } from "../interfaces/Employee";
 import { logout } from "../services/authService";
-import { getDepartamentos } from "../services/catalogService";
+import { getDepartments } from "../services/catalogService";
 import { listEmployees } from "../services/employeeService";
 
 type EmployeesPageProps = {
@@ -41,9 +41,9 @@ function formatCurrency(value: number): string {
 }
 
 export function EmployeesPage({ onLogout }: EmployeesPageProps) {
-  const [employees, setEmployees] = useState<Empleado[]>([]);
-  const [departamentos, setDepartamentos] = useState<Catalog[]>([]);
-  const [departamentoFilter, setDepartamentoFilter] = useState(ALL_DEPARTMENTS);
+  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [departments, setDepartments] = useState<Catalog[]>([]);
+  const [departmentFilter, setDepartmentFilter] = useState(ALL_DEPARTMENTS);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -65,14 +65,14 @@ export function EmployeesPage({ onLogout }: EmployeesPageProps) {
   );
 
   const loadEmployees = useCallback(
-    async (departamento?: string) => {
+    async (department?: string) => {
       const generation = ++loadGeneration.current;
 
       setLoading(true);
       setError("");
 
       try {
-        const data = await listEmployees(departamento);
+        const data = await listEmployees(department);
 
         if (generation !== loadGeneration.current) {
           return;
@@ -113,13 +113,13 @@ export function EmployeesPage({ onLogout }: EmployeesPageProps) {
   useEffect(() => {
     let cancelled = false;
 
-    getDepartamentos()
+    getDepartments()
       .then((deps) => {
         if (cancelled) {
           return;
         }
 
-        setDepartamentos(deps);
+        setDepartments(deps);
       })
       .catch((err: unknown) => {
         if (cancelled) {
@@ -148,7 +148,7 @@ export function EmployeesPage({ onLogout }: EmployeesPageProps) {
 
     async function fetchEmployees() {
       try {
-        const data = await listEmployees(departamentoFilter || undefined);
+        const data = await listEmployees(departmentFilter || undefined);
 
         if (cancelled || generation !== loadGeneration.current) {
           return;
@@ -184,12 +184,12 @@ export function EmployeesPage({ onLogout }: EmployeesPageProps) {
     return () => {
       cancelled = true;
     };
-  }, [departamentoFilter, handleAuthFailure]);
+  }, [departmentFilter, handleAuthFailure]);
 
   function handleDepartmentChange(value: string) {
     setLoading(true);
     setError("");
-    setDepartamentoFilter(value);
+    setDepartmentFilter(value);
   }
 
   function handleLogout() {
@@ -201,7 +201,7 @@ export function EmployeesPage({ onLogout }: EmployeesPageProps) {
     setDialogOpen(false);
     setSuccessMessage("Empleado creado correctamente.");
 
-    void loadEmployees(departamentoFilter || undefined);
+    void loadEmployees(departmentFilter || undefined);
   }
 
   return (
@@ -230,19 +230,19 @@ export function EmployeesPage({ onLogout }: EmployeesPageProps) {
           }}
         >
           <FormControl sx={{ minWidth: 260 }} size="small">
-            <InputLabel id="filtro-departamento-label">Departamento</InputLabel>
+            <InputLabel id="department-filter-label">Departamento</InputLabel>
 
             <Select
-              labelId="filtro-departamento-label"
+              labelId="department-filter-label"
               label="Departamento"
-              value={departamentoFilter}
+              value={departmentFilter}
               onChange={(event) => handleDepartmentChange(event.target.value)}
             >
               <MenuItem value={ALL_DEPARTMENTS}>Todos</MenuItem>
 
-              {departamentos.map((dep) => (
-                <MenuItem key={dep.id} value={dep.nombre}>
-                  {dep.nombre}
+              {departments.map((dep) => (
+                <MenuItem key={dep.id} value={dep.name}>
+                  {dep.name}
                 </MenuItem>
               ))}
             </Select>
@@ -291,16 +291,16 @@ export function EmployeesPage({ onLogout }: EmployeesPageProps) {
               </TableHead>
 
               <TableBody>
-                {employees.map((empleado) => (
-                  <TableRow key={empleado.empleadoId} hover>
-                    <TableCell>{empleado.numeroDocumento}</TableCell>
-                    <TableCell>{empleado.nombres}</TableCell>
-                    <TableCell>{empleado.apellidos}</TableCell>
-                    <TableCell align="right">{empleado.edad}</TableCell>
-                    <TableCell>{empleado.departamento}</TableCell>
-                    <TableCell>{empleado.cargo}</TableCell>
+                {employees.map((employee) => (
+                  <TableRow key={employee.employeeId} hover>
+                    <TableCell>{employee.documentNumber}</TableCell>
+                    <TableCell>{employee.firstNames}</TableCell>
+                    <TableCell>{employee.lastNames}</TableCell>
+                    <TableCell align="right">{employee.age}</TableCell>
+                    <TableCell>{employee.department}</TableCell>
+                    <TableCell>{employee.position}</TableCell>
                     <TableCell align="right">
-                      {formatCurrency(empleado.remuneracionMensual)}
+                      {formatCurrency(employee.monthlySalary)}
                     </TableCell>
                   </TableRow>
                 ))}

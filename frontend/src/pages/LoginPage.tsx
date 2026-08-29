@@ -15,26 +15,26 @@ type LoginPageProps = {
 };
 
 export function LoginPage({ onLoginSuccess }: LoginPageProps) {
-  const [usuario, setUsuario] = useState("");
-  const [clave, setClave] = useState("");
-  const [usuarioError, setUsuarioError] = useState("");
-  const [claveError, setClaveError] = useState("");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [usernameError, setUsernameError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   function validate(): boolean {
     let valid = true;
-    if (!usuario.trim()) {
-      setUsuarioError("El usuario es requerido.");
+    if (!username.trim()) {
+      setUsernameError("El usuario es requerido.");
       valid = false;
     } else {
-      setUsuarioError("");
+      setUsernameError("");
     }
-    if (!clave) {
-      setClaveError("La clave es requerida.");
+    if (!password) {
+      setPasswordError("La clave es requerida.");
       valid = false;
     } else {
-      setClaveError("");
+      setPasswordError("");
     }
     return valid;
   }
@@ -48,7 +48,7 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
 
     setLoading(true);
     try {
-      await login({ usuario: usuario.trim(), clave });
+      await login({ username: username.trim(), password });
       onLoginSuccess();
     } catch (err) {
       if (err instanceof ApiError && err.status === 401) {
@@ -79,11 +79,11 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
         <Box component="form" onSubmit={handleSubmit} noValidate>
           <TextField
             label="Usuario"
-            name="usuario"
-            value={usuario}
-            onChange={(e) => setUsuario(e.target.value)}
-            error={Boolean(usuarioError)}
-            helperText={usuarioError}
+            name="username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            error={Boolean(usernameError)}
+            helperText={usernameError}
             fullWidth
             required
             margin="normal"
@@ -92,12 +92,12 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
           />
           <TextField
             label="Clave"
-            name="clave"
+            name="password"
             type="password"
-            value={clave}
-            onChange={(e) => setClave(e.target.value)}
-            error={Boolean(claveError)}
-            helperText={claveError}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            error={Boolean(passwordError)}
+            helperText={passwordError}
             fullWidth
             required
             margin="normal"

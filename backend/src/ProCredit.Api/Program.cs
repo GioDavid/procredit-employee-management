@@ -10,25 +10,25 @@ using ProCredit.Infrastructure.Options;
 var builder = WebApplication.CreateBuilder(args);
 
 const string CorsPolicy = "FrontendPolicy";
-var origenesPermitidos = builder.Configuration.GetSection("Cors:OrigenesPermitidos").Get<string[]>() ?? [];
+var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [];
 var jwt = builder.Configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>()
-    ?? throw new InvalidOperationException("Falta la seccion de configuracion 'Jwt'.");
+    ?? throw new InvalidOperationException("Missing configuration section 'Jwt'.");
 
-if (string.IsNullOrWhiteSpace(jwt.ClaveSecreta))
+if (string.IsNullOrWhiteSpace(jwt.SecretKey))
 {
-    throw new InvalidOperationException("Falta 'Jwt__ClaveSecreta'. Ver backend/.env.example.");
+    throw new InvalidOperationException("Missing 'Jwt__SecretKey'. See backend/.env.example.");
 }
 
-if (string.IsNullOrWhiteSpace(builder.Configuration[$"{UsuarioPruebaOptions.SectionName}:Clave"]))
+if (string.IsNullOrWhiteSpace(builder.Configuration[$"{TestUserOptions.SectionName}:Password"]))
 {
-    throw new InvalidOperationException("Falta 'UsuarioPrueba__Clave'. Ver backend/.env.example.");
+    throw new InvalidOperationException("Missing 'TestUser__Password'. See backend/.env.example.");
 }
 
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 
 builder.Services.AddCors(options => options.AddPolicy(CorsPolicy, policy => policy
-    .WithOrigins(origenesPermitidos)
+    .WithOrigins(allowedOrigins)
     .AllowAnyHeader()
     .AllowAnyMethod()));
 
@@ -44,7 +44,7 @@ builder.Services
             ValidateIssuerSigningKey = true,
             ValidIssuer = jwt.Issuer,
             ValidAudience = jwt.Audience,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt.ClaveSecreta)),
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt.SecretKey)),
             ClockSkew = TimeSpan.Zero
         };
     });
@@ -54,7 +54,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
-    options.SwaggerDoc("v1", new OpenApiInfo { Title = "ProCredit - Gestion de Empleados", Version = "v1" });
+    options.SwaggerDoc("v1", new OpenApiInfo { Title = "ProCredit - Employee Management", Version = "v1" });
 
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {

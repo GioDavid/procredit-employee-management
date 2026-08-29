@@ -40,11 +40,11 @@ describe("LoginPage", () => {
     expect(onLoginSuccess).not.toHaveBeenCalled();
   });
 
-  it("calls login with trimmed usuario and notifies success", async () => {
+  it("calls login with trimmed username and notifies success", async () => {
     const user = userEvent.setup();
     loginMock.mockResolvedValue({
       token: "jwt-token",
-      expiraEn: "2026-08-29T12:00:00Z",
+      expiresAt: "2026-08-29T12:00:00Z",
     });
     render(<LoginPage onLoginSuccess={onLoginSuccess} />);
 
@@ -54,8 +54,8 @@ describe("LoginPage", () => {
 
     await waitFor(() => {
       expect(loginMock).toHaveBeenCalledWith({
-        usuario: "admin",
-        clave: "secret",
+        username: "admin",
+        password: "secret",
       });
     });
     expect(onLoginSuccess).toHaveBeenCalledTimes(1);
@@ -92,7 +92,7 @@ describe("LoginPage", () => {
     expect(screen.getByRole("button")).toBeDisabled();
     expect(onLoginSuccess).not.toHaveBeenCalled();
 
-    resolve({ token: "jwt-token", expiraEn: "2026-08-29T12:00:00Z" });
+    resolve({ token: "jwt-token", expiresAt: "2026-08-29T12:00:00Z" });
     await waitFor(() => {
       expect(onLoginSuccess).toHaveBeenCalledTimes(1);
     });

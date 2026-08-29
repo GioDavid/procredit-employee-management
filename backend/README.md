@@ -1,77 +1,77 @@
-# backend/ — API REST (.NET 10)
+# backend/ — REST API (.NET 10)
 
-Arquitectura en capas (ver `docs/SPEC.md` §3.1):
+Layered architecture (see `docs/SPEC.md` §3.1):
 
 ```
-ProCredit.Api             Controllers, autenticación JWT, middleware de errores, Swagger
-ProCredit.Application     Casos de uso, DTOs, validaciones, interfaces
-ProCredit.Domain          Entidades
-ProCredit.Infrastructure  SQL Server (invoca usp_Empleado_Consultar), emisión de JWT
+ProCredit.Api             Controllers, JWT authentication, error middleware, Swagger
+ProCredit.Application     Use cases, DTOs, validation, interfaces
+ProCredit.Domain          Entities
+ProCredit.Infrastructure  SQL Server (invokes usp_Employee_Get), JWT issuance
 ```
 
-Dependencias: `Api → Application → Domain`; `Infrastructure` implementa las interfaces declaradas en `Application`.
+Dependencies: `Api → Application → Domain`; `Infrastructure` implements the interfaces declared in `Application`.
 
-## Requisitos
+## Requirements
 
 - .NET 10 SDK
-- Base de datos `ProCreditRRHH` creada (ver `../database/README.md`)
+- Database `ProCreditRRHH` created (see `../database/README.md`)
 
-## Configurar el entorno local
+## Configure the local environment
 
-Los valores sensibles (cadena de conexión, clave del usuario de prueba y clave de firma del JWT) **no** están versionados: `appsettings.json` los deja vacíos y la API falla al arrancar si no se proporcionan.
+Sensitive values (connection string, test-user password, and JWT signing key) are **not** versioned: `appsettings.json` leaves them empty and the API fails to start if they are missing.
 
 ```bash
 cd backend
-cp .env.example .env      # completa los valores
+cp .env.example .env      # fill in the values
 set -a && source .env && set +a
 ```
 
-Alternativa sin archivo `.env` (User Secrets de .NET):
+Alternative without an `.env` file (.NET User Secrets):
 
 ```bash
 cd backend/src/ProCredit.Api
 dotnet user-secrets init
-dotnet user-secrets set "ConnectionStrings:ProCreditRRHH" "Server=localhost,1433;Database=ProCreditRRHH;User Id=sa;Password=<CLAVE_SA>;TrustServerCertificate=True;Encrypt=True;"
-dotnet user-secrets set "UsuarioPrueba:Clave" "<CLAVE_DE_PRUEBA>"
-dotnet user-secrets set "Jwt:ClaveSecreta" "<CADENA_ALEATORIA_MINIMO_32_CARACTERES>"
+dotnet user-secrets set "ConnectionStrings:ProCreditRRHH" "Server=localhost,1433;Database=ProCreditRRHH;User Id=sa;Password=<SA_PASSWORD>;TrustServerCertificate=True;Encrypt=True;"
+dotnet user-secrets set "TestUser:Password" "<TEST_USER_PASSWORD>"
+dotnet user-secrets set "Jwt:SecretKey" "<RANDOM_STRING_AT_LEAST_32_CHARACTERS>"
 ```
 
-## Ejecutar
+## Run
 
 ```bash
 cd backend
 dotnet run --project src/ProCredit.Api
 ```
 
-Swagger: `http://localhost:<puerto>/swagger` (botón **Authorize** para pegar el token).
+Swagger: `http://localhost:<port>/swagger` (**Authorize** to paste the token).
 
-## Configuración (`src/ProCredit.Api/appsettings.json`)
+## Configuration (`src/ProCredit.Api/appsettings.json`)
 
-| Clave | Descripción |
+| Key | Description |
 |---|---|
-| `ConnectionStrings:ProCreditRRHH` | Cadena de conexión a SQL Server (vacía: se aporta por entorno) |
-| `UsuarioPrueba` | Usuario de prueba preconfigurado (`admin`); la clave se aporta por entorno |
-| `Jwt` | Issuer, audience, minutos de expiración (60); la clave secreta se aporta por entorno |
-| `Cors:OrigenesPermitidos` | Orígenes del frontend (por defecto `http://localhost:5173`) |
+| `ConnectionStrings:ProCreditRRHH` | SQL Server connection string (empty: supplied by environment) |
+| `TestUser` | Preconfigured test user (`admin`); password is supplied by environment |
+| `Jwt` | Issuer, audience, expiration minutes (60); secret key is supplied by environment |
+| `Cors:AllowedOrigins` | Frontend origins (default `http://localhost:5173`) |
 
 ## Endpoints
 
-| Método | Ruta | Auth | Descripción |
+| Method | Path | Auth | Description |
 |---|---|---|---|
-| `POST` | `/api/auth/login` | — | Devuelve `{ token, expiraEn }`; 401 si las credenciales no coinciden |
-| `GET` | `/api/empleados` | Bearer | Todos los empleados |
-| `GET` | `/api/empleados?departamento=banca` | Bearer | Búsqueda por coincidencia parcial del departamento |
-| `GET` | `/api/empleados/{id}` | Bearer | Empleado por id |
-| `POST` | `/api/empleados` | Bearer | Alta; 201, 400 validación, 409 documento duplicado |
-| `GET` | `/api/departamentos` | Bearer | Catálogo para el formulario de alta |
-| `GET` | `/api/cargos` | Bearer | Catálogo para el formulario de alta |
+| `POST` | `/api/auth/login` | — | Returns `{ token, expiresAt }`; 401 if credentials do not match |
+| `GET` | `/api/employees` | Bearer | All employees |
+| `GET` | `/api/employees?department=banca` | Bearer | Partial match on department name |
+| `GET` | `/api/employees/{id}` | Bearer | Employee by id |
+| `POST` | `/api/employees` | Bearer | Create; 201, 400 validation, 409 duplicate document |
+| `GET` | `/api/departments` | Bearer | Catalog for the create form |
+| `GET` | `/api/positions` | Bearer | Catalog for the create form |
 
-Ejemplo:
+Example:
 
 ```bash
 TOKEN=$(curl -s -X POST http://localhost:5080/api/auth/login \
   -H 'Content-Type: application/json' \
-  -d "{\"usuario\":\"$UsuarioPrueba__Usuario\",\"clave\":\"$UsuarioPrueba__Clave\"}" | jq -r .token)
+  -d "{\"username\":\"$TestUser__Username\",\"password\":\"$TestUser__Password\"}" | jq -r .token)
 
-curl -H "Authorization: Bearer $TOKEN" "http://localhost:5080/api/empleados?departamento=banca"
+curl -H "Authorization: Bearer $TOKEN" "http://localhost:5080/api/employees?department=banca"
 ```

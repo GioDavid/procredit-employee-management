@@ -5,4 +5,7 @@
     <Project Path="src/ProCredit.Domain/ProCredit.Domain.csproj" />
     <Project Path="src/ProCredit.Infrastructure/ProCredit.Infrastructure.csproj" />
   </Folder>
+  <Folder Name="/tests/">
+    <Project Path="ProCredit.Application.Tests/ProCredit.Application.Tests.csproj" />
+  </Folder>
 </Solution>

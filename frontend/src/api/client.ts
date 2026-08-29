@@ -1,4 +1,4 @@
-const TOKEN_KEY = 'procredit_token';
+const TOKEN_KEY = "procredit_token";
 
 export class ApiError extends Error {
   readonly status: number;
@@ -6,7 +6,7 @@ export class ApiError extends Error {
 
   constructor(status: number, message: string, detail?: string) {
     super(message);
-    this.name = 'ApiError';
+    this.name = "ApiError";
     this.status = status;
     this.detail = detail;
   }
@@ -44,20 +44,20 @@ function notifyUnauthorized(): void {
 
 function getBaseUrl(): string {
   const baseUrl = import.meta.env.VITE_API_URL;
-  if (!baseUrl || typeof baseUrl !== 'string') {
-    throw new Error('VITE_API_URL is not configured.');
+  if (!baseUrl || typeof baseUrl !== "string") {
+    throw new Error("VITE_API_URL is not configured.");
   }
-  return baseUrl.replace(/\/$/, '');
+  return baseUrl.replace(/\/$/, "");
 }
 
 type RequestOptions = {
-  method?: 'GET' | 'POST';
+  method?: "GET" | "POST";
   body?: unknown;
   auth?: boolean;
 };
 
 async function parseError(response: Response): Promise<ApiError> {
-  let message = response.statusText || 'Request failed';
+  let message = response.statusText || "Request failed";
   let detail: string | undefined;
 
   try {
@@ -75,14 +75,17 @@ async function parseError(response: Response): Promise<ApiError> {
   return new ApiError(response.status, message, detail);
 }
 
-export async function apiRequest<T>(path: string, options: RequestOptions = {}): Promise<T> {
-  const { method = 'GET', body, auth = true } = options;
+export async function apiRequest<T>(
+  path: string,
+  options: RequestOptions = {},
+): Promise<T> {
+  const { method = "GET", body, auth = true } = options;
   const headers: Record<string, string> = {
-    Accept: 'application/json',
+    Accept: "application/json",
   };
 
   if (body !== undefined) {
-    headers['Content-Type'] = 'application/json';
+    headers["Content-Type"] = "application/json";
   }
 
   if (auth) {

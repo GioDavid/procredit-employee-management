@@ -1,10 +1,10 @@
-import { apiRequest } from '../api/client';
-import type { Catalog } from '../interfaces/Catalog';
+import { apiRequest } from "../api/client";
+import type { Catalog } from "../interfaces/Catalog";
 
 export async function getDepartamentos(): Promise<Catalog[]> {
-  return apiRequest<Catalog[]>('/api/departamentos');
+  return apiRequest<Catalog[]>("/api/departamentos");
 }
 
 export async function getCargos(): Promise<Catalog[]> {
-  return apiRequest<Catalog[]>('/api/cargos');
+  return apiRequest<Catalog[]>("/api/cargos");
 }

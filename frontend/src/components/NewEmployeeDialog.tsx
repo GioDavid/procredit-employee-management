@@ -1,23 +1,23 @@
-import { useEffect, useState, type FormEvent } from 'react';
-import Alert from '@mui/material/Alert';
-import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import CircularProgress from '@mui/material/CircularProgress';
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogTitle from '@mui/material/DialogTitle';
-import FormControl from '@mui/material/FormControl';
-import FormHelperText from '@mui/material/FormHelperText';
-import InputLabel from '@mui/material/InputLabel';
-import MenuItem from '@mui/material/MenuItem';
-import Select from '@mui/material/Select';
-import TextField from '@mui/material/TextField';
-import { ApiError } from '../api/client';
-import type { Catalog } from '../interfaces/Catalog';
-import type { CreateEmployeeRequest } from '../interfaces/CreateEmployeeRequest';
-import { getCargos, getDepartamentos } from '../services/catalogService';
-import { createEmployee } from '../services/employeeService';
+import { useEffect, useState, type FormEvent } from "react";
+import Alert from "@mui/material/Alert";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import CircularProgress from "@mui/material/CircularProgress";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogTitle from "@mui/material/DialogTitle";
+import FormControl from "@mui/material/FormControl";
+import FormHelperText from "@mui/material/FormHelperText";
+import InputLabel from "@mui/material/InputLabel";
+import MenuItem from "@mui/material/MenuItem";
+import Select from "@mui/material/Select";
+import TextField from "@mui/material/TextField";
+import { ApiError } from "../api/client";
+import type { Catalog } from "../interfaces/Catalog";
+import type { CreateEmployeeRequest } from "../interfaces/CreateEmployeeRequest";
+import { getCargos, getDepartamentos } from "../services/catalogService";
+import { createEmployee } from "../services/employeeService";
 
 type NewEmployeeDialogProps = {
   open: boolean;
@@ -28,22 +28,26 @@ type NewEmployeeDialogProps = {
 type FormErrors = Partial<Record<keyof CreateEmployeeRequest, string>>;
 
 const emptyForm = {
-  numeroDocumento: '',
-  nombres: '',
-  apellidos: '',
-  edad: '',
-  remuneracionMensual: '',
-  departamentoId: '',
-  cargoId: '',
+  numeroDocumento: "",
+  nombres: "",
+  apellidos: "",
+  edad: "",
+  remuneracionMensual: "",
+  departamentoId: "",
+  cargoId: "",
 };
 
-export function NewEmployeeDialog({ open, onClose, onCreated }: NewEmployeeDialogProps) {
+export function NewEmployeeDialog({
+  open,
+  onClose,
+  onCreated,
+}: NewEmployeeDialogProps) {
   const [form, setForm] = useState(emptyForm);
   const [errors, setErrors] = useState<FormErrors>({});
   const [departamentos, setDepartamentos] = useState<Catalog[]>([]);
   const [cargos, setCargos] = useState<Catalog[]>([]);
-  const [catalogError, setCatalogError] = useState('');
-  const [submitError, setSubmitError] = useState('');
+  const [catalogError, setCatalogError] = useState("");
+  const [submitError, setSubmitError] = useState("");
   const [loadingCatalogs, setLoadingCatalogs] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
@@ -66,7 +70,11 @@ export function NewEmployeeDialog({ open, onClose, onCreated }: NewEmployeeDialo
         if (cancelled || (err instanceof ApiError && err.status === 401)) {
           return;
         }
-        setCatalogError(err instanceof Error ? err.message : 'No se pudieron cargar los catálogos.');
+        setCatalogError(
+          err instanceof Error
+            ? err.message
+            : "No se pudieron cargar los catálogos.",
+        );
       })
       .finally(() => {
         if (!cancelled) {
@@ -82,7 +90,7 @@ export function NewEmployeeDialog({ open, onClose, onCreated }: NewEmployeeDialo
   function resetAndClose() {
     setForm(emptyForm);
     setErrors({});
-    setSubmitError('');
+    setSubmitError("");
     onClose();
   }
 
@@ -97,29 +105,29 @@ export function NewEmployeeDialog({ open, onClose, onCreated }: NewEmployeeDialo
     const cargoId = Number(form.cargoId);
 
     if (numeroDocumento.length < 6 || numeroDocumento.length > 20) {
-      nextErrors.numeroDocumento = 'Debe tener entre 6 y 20 caracteres.';
+      nextErrors.numeroDocumento = "Debe tener entre 6 y 20 caracteres.";
     }
     if (!nombres) {
-      nextErrors.nombres = 'Los nombres son requeridos.';
+      nextErrors.nombres = "Los nombres son requeridos.";
     } else if (nombres.length > 100) {
-      nextErrors.nombres = 'Máximo 100 caracteres.';
+      nextErrors.nombres = "Máximo 100 caracteres.";
     }
     if (!apellidos) {
-      nextErrors.apellidos = 'Los apellidos son requeridos.';
+      nextErrors.apellidos = "Los apellidos son requeridos.";
     } else if (apellidos.length > 100) {
-      nextErrors.apellidos = 'Máximo 100 caracteres.';
+      nextErrors.apellidos = "Máximo 100 caracteres.";
     }
     if (!Number.isInteger(edad) || edad < 18 || edad > 100) {
-      nextErrors.edad = 'La edad debe estar entre 18 y 100.';
+      nextErrors.edad = "La edad debe estar entre 18 y 100.";
     }
     if (!(remuneracionMensual > 0)) {
-      nextErrors.remuneracionMensual = 'La remuneración debe ser mayor que 0.';
+      nextErrors.remuneracionMensual = "La remuneración debe ser mayor que 0.";
     }
     if (!Number.isInteger(departamentoId) || departamentoId < 1) {
-      nextErrors.departamentoId = 'Seleccione un departamento.';
+      nextErrors.departamentoId = "Seleccione un departamento.";
     }
     if (!Number.isInteger(cargoId) || cargoId < 1) {
-      nextErrors.cargoId = 'Seleccione un cargo.';
+      nextErrors.cargoId = "Seleccione un cargo.";
     }
 
     setErrors(nextErrors);
@@ -140,7 +148,7 @@ export function NewEmployeeDialog({ open, onClose, onCreated }: NewEmployeeDialo
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
-    setSubmitError('');
+    setSubmitError("");
     const payload = validate();
     if (!payload) {
       return;
@@ -161,7 +169,7 @@ export function NewEmployeeDialog({ open, onClose, onCreated }: NewEmployeeDialo
       } else if (err instanceof Error) {
         setSubmitError(err.message);
       } else {
-        setSubmitError('No se pudo crear el empleado.');
+        setSubmitError("No se pudo crear el empleado.");
       }
     } finally {
       setSubmitting(false);
@@ -169,12 +177,17 @@ export function NewEmployeeDialog({ open, onClose, onCreated }: NewEmployeeDialo
   }
 
   return (
-    <Dialog open={open} onClose={submitting ? undefined : resetAndClose} fullWidth maxWidth="sm">
+    <Dialog
+      open={open}
+      onClose={submitting ? undefined : resetAndClose}
+      fullWidth
+      maxWidth="sm"
+    >
       <DialogTitle>Nuevo empleado</DialogTitle>
       <Box component="form" onSubmit={handleSubmit} noValidate>
         <DialogContent>
           {loadingCatalogs ? (
-            <Box sx={{ display: 'flex', justifyContent: 'center', py: 3 }}>
+            <Box sx={{ display: "flex", justifyContent: "center", py: 3 }}>
               <CircularProgress size={28} />
             </Box>
           ) : null}
@@ -188,7 +201,9 @@ export function NewEmployeeDialog({ open, onClose, onCreated }: NewEmployeeDialo
           <TextField
             label="Número de documento"
             value={form.numeroDocumento}
-            onChange={(e) => setForm((prev) => ({ ...prev, numeroDocumento: e.target.value }))}
+            onChange={(e) =>
+              setForm((prev) => ({ ...prev, numeroDocumento: e.target.value }))
+            }
             error={Boolean(errors.numeroDocumento)}
             helperText={errors.numeroDocumento}
             fullWidth
@@ -199,7 +214,9 @@ export function NewEmployeeDialog({ open, onClose, onCreated }: NewEmployeeDialo
           <TextField
             label="Nombres"
             value={form.nombres}
-            onChange={(e) => setForm((prev) => ({ ...prev, nombres: e.target.value }))}
+            onChange={(e) =>
+              setForm((prev) => ({ ...prev, nombres: e.target.value }))
+            }
             error={Boolean(errors.nombres)}
             helperText={errors.nombres}
             fullWidth
@@ -210,7 +227,9 @@ export function NewEmployeeDialog({ open, onClose, onCreated }: NewEmployeeDialo
           <TextField
             label="Apellidos"
             value={form.apellidos}
-            onChange={(e) => setForm((prev) => ({ ...prev, apellidos: e.target.value }))}
+            onChange={(e) =>
+              setForm((prev) => ({ ...prev, apellidos: e.target.value }))
+            }
             error={Boolean(errors.apellidos)}
             helperText={errors.apellidos}
             fullWidth
@@ -222,7 +241,9 @@ export function NewEmployeeDialog({ open, onClose, onCreated }: NewEmployeeDialo
             label="Edad"
             type="number"
             value={form.edad}
-            onChange={(e) => setForm((prev) => ({ ...prev, edad: e.target.value }))}
+            onChange={(e) =>
+              setForm((prev) => ({ ...prev, edad: e.target.value }))
+            }
             error={Boolean(errors.edad)}
             helperText={errors.edad}
             fullWidth
@@ -235,7 +256,12 @@ export function NewEmployeeDialog({ open, onClose, onCreated }: NewEmployeeDialo
             label="Remuneración mensual"
             type="number"
             value={form.remuneracionMensual}
-            onChange={(e) => setForm((prev) => ({ ...prev, remuneracionMensual: e.target.value }))}
+            onChange={(e) =>
+              setForm((prev) => ({
+                ...prev,
+                remuneracionMensual: e.target.value,
+              }))
+            }
             error={Boolean(errors.remuneracionMensual)}
             helperText={errors.remuneracionMensual}
             fullWidth
@@ -245,13 +271,23 @@ export function NewEmployeeDialog({ open, onClose, onCreated }: NewEmployeeDialo
             slotProps={{ htmlInput: { min: 0.01, step: 0.01 } }}
           />
 
-          <FormControl fullWidth margin="normal" error={Boolean(errors.departamentoId)} disabled={submitting}>
+          <FormControl
+            fullWidth
+            margin="normal"
+            error={Boolean(errors.departamentoId)}
+            disabled={submitting}
+          >
             <InputLabel id="departamento-label">Departamento</InputLabel>
             <Select
               labelId="departamento-label"
               label="Departamento"
               value={form.departamentoId}
-              onChange={(e) => setForm((prev) => ({ ...prev, departamentoId: String(e.target.value) }))}
+              onChange={(e) =>
+                setForm((prev) => ({
+                  ...prev,
+                  departamentoId: String(e.target.value),
+                }))
+              }
               displayEmpty
             >
               <MenuItem value="">
@@ -263,16 +299,28 @@ export function NewEmployeeDialog({ open, onClose, onCreated }: NewEmployeeDialo
                 </MenuItem>
               ))}
             </Select>
-            {errors.departamentoId ? <FormHelperText>{errors.departamentoId}</FormHelperText> : null}
+            {errors.departamentoId ? (
+              <FormHelperText>{errors.departamentoId}</FormHelperText>
+            ) : null}
           </FormControl>
 
-          <FormControl fullWidth margin="normal" error={Boolean(errors.cargoId)} disabled={submitting}>
+          <FormControl
+            fullWidth
+            margin="normal"
+            error={Boolean(errors.cargoId)}
+            disabled={submitting}
+          >
             <InputLabel id="cargo-label">Cargo</InputLabel>
             <Select
               labelId="cargo-label"
               label="Cargo"
               value={form.cargoId}
-              onChange={(e) => setForm((prev) => ({ ...prev, cargoId: String(e.target.value) }))}
+              onChange={(e) =>
+                setForm((prev) => ({
+                  ...prev,
+                  cargoId: String(e.target.value),
+                }))
+              }
               displayEmpty
             >
               <MenuItem value="">
@@ -284,7 +332,9 @@ export function NewEmployeeDialog({ open, onClose, onCreated }: NewEmployeeDialo
                 </MenuItem>
               ))}
             </Select>
-            {errors.cargoId ? <FormHelperText>{errors.cargoId}</FormHelperText> : null}
+            {errors.cargoId ? (
+              <FormHelperText>{errors.cargoId}</FormHelperText>
+            ) : null}
           </FormControl>
 
           {submitError ? (
@@ -297,8 +347,16 @@ export function NewEmployeeDialog({ open, onClose, onCreated }: NewEmployeeDialo
           <Button onClick={resetAndClose} disabled={submitting}>
             Cancelar
           </Button>
-          <Button type="submit" variant="contained" disabled={submitting || loadingCatalogs || Boolean(catalogError)}>
-            {submitting ? <CircularProgress size={22} color="inherit" /> : 'Guardar'}
+          <Button
+            type="submit"
+            variant="contained"
+            disabled={submitting || loadingCatalogs || Boolean(catalogError)}
+          >
+            {submitting ? (
+              <CircularProgress size={22} color="inherit" />
+            ) : (
+              "Guardar"
+            )}
           </Button>
         </DialogActions>
       </Box>

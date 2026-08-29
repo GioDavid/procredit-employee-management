@@ -1,40 +1,40 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import Alert from '@mui/material/Alert';
-import AppBar from '@mui/material/AppBar';
-import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import CircularProgress from '@mui/material/CircularProgress';
-import Container from '@mui/material/Container';
-import FormControl from '@mui/material/FormControl';
-import InputLabel from '@mui/material/InputLabel';
-import MenuItem from '@mui/material/MenuItem';
-import Paper from '@mui/material/Paper';
-import Select from '@mui/material/Select';
-import Snackbar from '@mui/material/Snackbar';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import Toolbar from '@mui/material/Toolbar';
-import Typography from '@mui/material/Typography';
-import { ApiError } from '../api/client';
-import { NewEmployeeDialog } from '../components/NewEmployeeDialog';
-import type { Catalog } from '../interfaces/Catalog';
-import type { Empleado } from '../interfaces/Empleado';
-import { logout } from '../services/authService';
-import { getDepartamentos } from '../services/catalogService';
-import { listEmployees } from '../services/employeeService';
+import { useCallback, useEffect, useRef, useState } from "react";
+import Alert from "@mui/material/Alert";
+import AppBar from "@mui/material/AppBar";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import CircularProgress from "@mui/material/CircularProgress";
+import Container from "@mui/material/Container";
+import FormControl from "@mui/material/FormControl";
+import InputLabel from "@mui/material/InputLabel";
+import MenuItem from "@mui/material/MenuItem";
+import Paper from "@mui/material/Paper";
+import Select from "@mui/material/Select";
+import Snackbar from "@mui/material/Snackbar";
+import Table from "@mui/material/Table";
+import TableBody from "@mui/material/TableBody";
+import TableCell from "@mui/material/TableCell";
+import TableContainer from "@mui/material/TableContainer";
+import TableHead from "@mui/material/TableHead";
+import TableRow from "@mui/material/TableRow";
+import Toolbar from "@mui/material/Toolbar";
+import Typography from "@mui/material/Typography";
+import { ApiError } from "../api/client";
+import { NewEmployeeDialog } from "../components/NewEmployeeDialog";
+import type { Catalog } from "../interfaces/Catalog";
+import type { Empleado } from "../interfaces/Empleado";
+import { logout } from "../services/authService";
+import { getDepartamentos } from "../services/catalogService";
+import { listEmployees } from "../services/employeeService";
 
 type EmployeesPageProps = {
   onLogout: () => void;
 };
 
-const ALL_DEPARTMENTS = '';
+const ALL_DEPARTMENTS = "";
 
 function formatCurrency(value: number): string {
-  return new Intl.NumberFormat('es-CO', {
+  return new Intl.NumberFormat("es-CO", {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(value);
@@ -43,12 +43,11 @@ function formatCurrency(value: number): string {
 export function EmployeesPage({ onLogout }: EmployeesPageProps) {
   const [employees, setEmployees] = useState<Empleado[]>([]);
   const [departamentos, setDepartamentos] = useState<Catalog[]>([]);
-  const [departamentoFilter, setDepartamentoFilter] =
-    useState(ALL_DEPARTMENTS);
+  const [departamentoFilter, setDepartamentoFilter] = useState(ALL_DEPARTMENTS);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [successMessage, setSuccessMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState("");
 
   const loadGeneration = useRef(0);
 
@@ -70,7 +69,7 @@ export function EmployeesPage({ onLogout }: EmployeesPageProps) {
       const generation = ++loadGeneration.current;
 
       setLoading(true);
-      setError('');
+      setError("");
 
       try {
         const data = await listEmployees(departamento);
@@ -92,7 +91,7 @@ export function EmployeesPage({ onLogout }: EmployeesPageProps) {
         setError(
           err instanceof Error
             ? err.message
-            : 'No se pudieron cargar los empleados.',
+            : "No se pudieron cargar los empleados.",
         );
 
         setEmployees([]);
@@ -134,7 +133,7 @@ export function EmployeesPage({ onLogout }: EmployeesPageProps) {
         setError(
           err instanceof Error
             ? err.message
-            : 'No se pudieron cargar los departamentos.',
+            : "No se pudieron cargar los departamentos.",
         );
       });
 
@@ -149,24 +148,16 @@ export function EmployeesPage({ onLogout }: EmployeesPageProps) {
 
     async function fetchEmployees() {
       try {
-        const data = await listEmployees(
-          departamentoFilter || undefined,
-        );
+        const data = await listEmployees(departamentoFilter || undefined);
 
-        if (
-          cancelled ||
-          generation !== loadGeneration.current
-        ) {
+        if (cancelled || generation !== loadGeneration.current) {
           return;
         }
 
         setEmployees(data);
-        setError('');
+        setError("");
       } catch (err) {
-        if (
-          cancelled ||
-          generation !== loadGeneration.current
-        ) {
+        if (cancelled || generation !== loadGeneration.current) {
           return;
         }
 
@@ -177,15 +168,12 @@ export function EmployeesPage({ onLogout }: EmployeesPageProps) {
         setError(
           err instanceof Error
             ? err.message
-            : 'No se pudieron cargar los empleados.',
+            : "No se pudieron cargar los empleados.",
         );
 
         setEmployees([]);
       } finally {
-        if (
-          !cancelled &&
-          generation === loadGeneration.current
-        ) {
+        if (!cancelled && generation === loadGeneration.current) {
           setLoading(false);
         }
       }
@@ -200,7 +188,7 @@ export function EmployeesPage({ onLogout }: EmployeesPageProps) {
 
   function handleDepartmentChange(value: string) {
     setLoading(true);
-    setError('');
+    setError("");
     setDepartamentoFilter(value);
   }
 
@@ -211,91 +199,62 @@ export function EmployeesPage({ onLogout }: EmployeesPageProps) {
 
   function handleCreated() {
     setDialogOpen(false);
-    setSuccessMessage('Empleado creado correctamente.');
+    setSuccessMessage("Empleado creado correctamente.");
 
-    void loadEmployees(
-      departamentoFilter || undefined,
-    );
+    void loadEmployees(departamentoFilter || undefined);
   }
 
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: 'grey.50' }}>
+    <Box sx={{ minHeight: "100vh", bgcolor: "grey.50" }}>
       <AppBar position="static" elevation={1}>
         <Toolbar>
-          <Typography
-            variant="h6"
-            sx={{ flexGrow: 1 }}
-          >
+          <Typography variant="h6" sx={{ flexGrow: 1 }}>
             ProCredit — Empleados
           </Typography>
 
-          <Button
-            color="inherit"
-            onClick={handleLogout}
-          >
+          <Button color="inherit" onClick={handleLogout}>
             Cerrar sesión
           </Button>
         </Toolbar>
       </AppBar>
 
-      <Container
-        maxWidth="lg"
-        sx={{ py: 3 }}
-      >
+      <Container maxWidth="lg" sx={{ py: 3 }}>
         <Box
           sx={{
-            display: 'flex',
-            flexWrap: 'wrap',
+            display: "flex",
+            flexWrap: "wrap",
             gap: 2,
-            alignItems: 'center',
-            justifyContent: 'space-between',
+            alignItems: "center",
+            justifyContent: "space-between",
             mb: 3,
           }}
         >
-          <FormControl
-            sx={{ minWidth: 260 }}
-            size="small"
-          >
-            <InputLabel id="filtro-departamento-label">
-              Departamento
-            </InputLabel>
+          <FormControl sx={{ minWidth: 260 }} size="small">
+            <InputLabel id="filtro-departamento-label">Departamento</InputLabel>
 
             <Select
               labelId="filtro-departamento-label"
               label="Departamento"
               value={departamentoFilter}
-              onChange={(event) =>
-                handleDepartmentChange(event.target.value)
-              }
+              onChange={(event) => handleDepartmentChange(event.target.value)}
             >
-              <MenuItem value={ALL_DEPARTMENTS}>
-                Todos
-              </MenuItem>
+              <MenuItem value={ALL_DEPARTMENTS}>Todos</MenuItem>
 
               {departamentos.map((dep) => (
-                <MenuItem
-                  key={dep.id}
-                  value={dep.nombre}
-                >
+                <MenuItem key={dep.id} value={dep.nombre}>
                   {dep.nombre}
                 </MenuItem>
               ))}
             </Select>
           </FormControl>
 
-          <Button
-            variant="contained"
-            onClick={() => setDialogOpen(true)}
-          >
+          <Button variant="contained" onClick={() => setDialogOpen(true)}>
             Nuevo empleado
           </Button>
         </Box>
 
         {error ? (
-          <Alert
-            severity="error"
-            sx={{ mb: 2 }}
-          >
+          <Alert severity="error" sx={{ mb: 2 }}>
             {error}
           </Alert>
         ) : null}
@@ -303,8 +262,8 @@ export function EmployeesPage({ onLogout }: EmployeesPageProps) {
         {loading ? (
           <Box
             sx={{
-              display: 'flex',
-              justifyContent: 'center',
+              display: "flex",
+              justifyContent: "center",
               py: 8,
             }}
           >
@@ -312,12 +271,8 @@ export function EmployeesPage({ onLogout }: EmployeesPageProps) {
           </Box>
         ) : null}
 
-        {!loading &&
-        !error &&
-        employees.length === 0 ? (
-          <Alert severity="info">
-            No se encontraron empleados.
-          </Alert>
+        {!loading && !error && employees.length === 0 ? (
+          <Alert severity="info">No se encontraron empleados.</Alert>
         ) : null}
 
         {!loading && employees.length > 0 ? (
@@ -328,47 +283,24 @@ export function EmployeesPage({ onLogout }: EmployeesPageProps) {
                   <TableCell>Documento</TableCell>
                   <TableCell>Nombres</TableCell>
                   <TableCell>Apellidos</TableCell>
-                  <TableCell align="right">
-                    Edad
-                  </TableCell>
-                  <TableCell>
-                    Departamento
-                  </TableCell>
+                  <TableCell align="right">Edad</TableCell>
+                  <TableCell>Departamento</TableCell>
                   <TableCell>Cargo</TableCell>
-                  <TableCell align="right">
-                    Remuneración mensual
-                  </TableCell>
+                  <TableCell align="right">Remuneración mensual</TableCell>
                 </TableRow>
               </TableHead>
 
               <TableBody>
                 {employees.map((empleado) => (
-                  <TableRow
-                    key={empleado.empleadoId}
-                    hover
-                  >
-                    <TableCell>
-                      {empleado.numeroDocumento}
-                    </TableCell>
-                    <TableCell>
-                      {empleado.nombres}
-                    </TableCell>
-                    <TableCell>
-                      {empleado.apellidos}
-                    </TableCell>
+                  <TableRow key={empleado.empleadoId} hover>
+                    <TableCell>{empleado.numeroDocumento}</TableCell>
+                    <TableCell>{empleado.nombres}</TableCell>
+                    <TableCell>{empleado.apellidos}</TableCell>
+                    <TableCell align="right">{empleado.edad}</TableCell>
+                    <TableCell>{empleado.departamento}</TableCell>
+                    <TableCell>{empleado.cargo}</TableCell>
                     <TableCell align="right">
-                      {empleado.edad}
-                    </TableCell>
-                    <TableCell>
-                      {empleado.departamento}
-                    </TableCell>
-                    <TableCell>
-                      {empleado.cargo}
-                    </TableCell>
-                    <TableCell align="right">
-                      {formatCurrency(
-                        empleado.remuneracionMensual,
-                      )}
+                      {formatCurrency(empleado.remuneracionMensual)}
                     </TableCell>
                   </TableRow>
                 ))}
@@ -387,16 +319,13 @@ export function EmployeesPage({ onLogout }: EmployeesPageProps) {
       <Snackbar
         open={Boolean(successMessage)}
         autoHideDuration={4000}
-        onClose={() => setSuccessMessage('')}
+        onClose={() => setSuccessMessage("")}
         anchorOrigin={{
-          vertical: 'bottom',
-          horizontal: 'center',
+          vertical: "bottom",
+          horizontal: "center",
         }}
       >
-        <Alert
-          severity="success"
-          onClose={() => setSuccessMessage('')}
-        >
+        <Alert severity="success" onClose={() => setSuccessMessage("")}>
           {successMessage}
         </Alert>
       </Snackbar>

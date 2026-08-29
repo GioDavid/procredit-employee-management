@@ -1,18 +1,18 @@
-import { useEffect, useState } from 'react';
-import CssBaseline from '@mui/material/CssBaseline';
-import { ThemeProvider, createTheme } from '@mui/material/styles';
-import { onUnauthorized } from './api/client';
-import { EmployeesPage } from './pages/EmployeesPage';
-import { LoginPage } from './pages/LoginPage';
-import { isAuthenticated } from './services/authService';
+import { useEffect, useState } from "react";
+import CssBaseline from "@mui/material/CssBaseline";
+import { ThemeProvider, createTheme } from "@mui/material/styles";
+import { onUnauthorized } from "./api/client";
+import { EmployeesPage } from "./pages/EmployeesPage";
+import { LoginPage } from "./pages/LoginPage";
+import { isAuthenticated } from "./services/authService";
 
 const theme = createTheme({
   palette: {
     primary: {
-      main: '#0b5cab',
+      main: "#0b5cab",
     },
     secondary: {
-      main: '#1b7a4e',
+      main: "#1b7a4e",
     },
   },
 });

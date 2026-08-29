@@ -11,23 +11,23 @@ public sealed class ExceptionHandlingMiddleware(RequestDelegate next, ILogger<Ex
         {
             await next(context);
         }
-        catch (ConflictoException ex)
+        catch (ConflictException ex)
         {
-            await EscribirProblema(context, StatusCodes.Status409Conflict, "Conflicto", ex.Message);
+            await WriteProblem(context, StatusCodes.Status409Conflict, "Conflicto", ex.Message);
         }
-        catch (ReglaNegocioException ex)
+        catch (BusinessRuleException ex)
         {
-            await EscribirProblema(context, StatusCodes.Status400BadRequest, "Solicitud invalida", ex.Message);
+            await WriteProblem(context, StatusCodes.Status400BadRequest, "Solicitud invalida", ex.Message);
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Error no controlado procesando {Path}", context.Request.Path);
-            await EscribirProblema(context, StatusCodes.Status500InternalServerError,
+            logger.LogError(ex, "Unhandled error processing {Path}", context.Request.Path);
+            await WriteProblem(context, StatusCodes.Status500InternalServerError,
                 "Error interno", "Ocurrio un error inesperado.");
         }
     }
 
-    private static async Task EscribirProblema(HttpContext context, int statusCode, string title, string detail)
+    private static async Task WriteProblem(HttpContext context, int statusCode, string title, string detail)
     {
         var problem = new ProblemDetails
         {

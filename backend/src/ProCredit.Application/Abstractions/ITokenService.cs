@@ -2,5 +2,5 @@ namespace ProCredit.Application.Abstractions;
 
 public interface ITokenService
 {
-    (string Token, DateTime ExpiraEn) Generar(string usuario);
+    (string Token, DateTime ExpiresAt) Generate(string username);
 }

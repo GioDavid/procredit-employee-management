@@ -4,5 +4,5 @@ namespace ProCredit.Application.Services;
 
 public interface IAuthService
 {
-    LoginResponse? Autenticar(LoginRequest request);
+    LoginResponse? Authenticate(LoginRequest request);
 }

@@ -1,64 +1,64 @@
 /*
     02_create_tables.sql
-    Tablas, claves primarias (IDENTITY), claves foráneas e índices.
-    Ver docs/SPEC.md (2. Modelo de datos).
+    Tables, primary keys (IDENTITY), foreign keys, and indexes.
+    See docs/SPEC.md (2. Data model).
 */
 
 USE ProCreditRRHH;
 GO
 
-IF OBJECT_ID(N'dbo.Departamento', N'U') IS NULL
+IF OBJECT_ID(N'dbo.Departments', N'U') IS NULL
 BEGIN
-    CREATE TABLE dbo.Departamento
+    CREATE TABLE dbo.Departments
     (
-        DepartamentoId INT IDENTITY(1,1) NOT NULL,
-        Nombre         NVARCHAR(100)     NOT NULL,
-        CONSTRAINT PK_Departamento PRIMARY KEY (DepartamentoId),
-        CONSTRAINT UQ_Departamento_Nombre UNIQUE (Nombre)
+        DepartmentId INT IDENTITY(1,1) NOT NULL,
+        Name         NVARCHAR(100)     NOT NULL,
+        CONSTRAINT PK_Departments PRIMARY KEY (DepartmentId),
+        CONSTRAINT UQ_Departments_Name UNIQUE (Name)
     );
 END
 GO
 
-IF OBJECT_ID(N'dbo.Cargo', N'U') IS NULL
+IF OBJECT_ID(N'dbo.Positions', N'U') IS NULL
 BEGIN
-    CREATE TABLE dbo.Cargo
+    CREATE TABLE dbo.Positions
     (
-        CargoId INT IDENTITY(1,1) NOT NULL,
-        Nombre  NVARCHAR(100)     NOT NULL,
-        CONSTRAINT PK_Cargo PRIMARY KEY (CargoId),
-        CONSTRAINT UQ_Cargo_Nombre UNIQUE (Nombre)
+        PositionId INT IDENTITY(1,1) NOT NULL,
+        Name       NVARCHAR(100)     NOT NULL,
+        CONSTRAINT PK_Positions PRIMARY KEY (PositionId),
+        CONSTRAINT UQ_Positions_Name UNIQUE (Name)
     );
 END
 GO
 
-IF OBJECT_ID(N'dbo.Empleado', N'U') IS NULL
+IF OBJECT_ID(N'dbo.Employees', N'U') IS NULL
 BEGIN
-    CREATE TABLE dbo.Empleado
+    CREATE TABLE dbo.Employees
     (
-        EmpleadoId          INT IDENTITY(1,1) NOT NULL,
-        NumeroDocumento     VARCHAR(20)       NOT NULL,
-        Nombres             NVARCHAR(100)     NOT NULL,
-        Apellidos           NVARCHAR(100)     NOT NULL,
-        Edad                INT               NOT NULL,
-        RemuneracionMensual DECIMAL(18,2)     NOT NULL,
-        DepartamentoId      INT               NOT NULL,
-        CargoId             INT               NOT NULL,
-        CONSTRAINT PK_Empleado PRIMARY KEY (EmpleadoId),
-        CONSTRAINT UQ_Empleado_NumeroDocumento UNIQUE (NumeroDocumento),
-        CONSTRAINT CK_Empleado_Edad CHECK (Edad BETWEEN 18 AND 100),
-        CONSTRAINT CK_Empleado_Remuneracion CHECK (RemuneracionMensual >= 0),
-        CONSTRAINT FK_Empleado_Departamento FOREIGN KEY (DepartamentoId)
-            REFERENCES dbo.Departamento (DepartamentoId),
-        CONSTRAINT FK_Empleado_Cargo FOREIGN KEY (CargoId)
-            REFERENCES dbo.Cargo (CargoId)
+        EmployeeId      INT IDENTITY(1,1) NOT NULL,
+        DocumentNumber  VARCHAR(20)       NOT NULL,
+        FirstNames      NVARCHAR(100)     NOT NULL,
+        LastNames       NVARCHAR(100)     NOT NULL,
+        Age             INT               NOT NULL,
+        MonthlySalary   DECIMAL(18,2)     NOT NULL,
+        DepartmentId    INT               NOT NULL,
+        PositionId      INT               NOT NULL,
+        CONSTRAINT PK_Employees PRIMARY KEY (EmployeeId),
+        CONSTRAINT UQ_Employees_DocumentNumber UNIQUE (DocumentNumber),
+        CONSTRAINT CK_Employees_Age CHECK (Age BETWEEN 18 AND 100),
+        CONSTRAINT CK_Employees_MonthlySalary CHECK (MonthlySalary >= 0),
+        CONSTRAINT FK_Employees_Departments FOREIGN KEY (DepartmentId)
+            REFERENCES dbo.Departments (DepartmentId),
+        CONSTRAINT FK_Employees_Positions FOREIGN KEY (PositionId)
+            REFERENCES dbo.Positions (PositionId)
     );
 END
 GO
 
-IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'IX_Empleado_DepartamentoId' AND object_id = OBJECT_ID(N'dbo.Empleado'))
-    CREATE INDEX IX_Empleado_DepartamentoId ON dbo.Empleado (DepartamentoId);
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'IX_Employees_DepartmentId' AND object_id = OBJECT_ID(N'dbo.Employees'))
+    CREATE INDEX IX_Employees_DepartmentId ON dbo.Employees (DepartmentId);
 GO
 
-IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'IX_Empleado_CargoId' AND object_id = OBJECT_ID(N'dbo.Empleado'))
-    CREATE INDEX IX_Empleado_CargoId ON dbo.Empleado (CargoId);
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'IX_Employees_PositionId' AND object_id = OBJECT_ID(N'dbo.Employees'))
+    CREATE INDEX IX_Employees_PositionId ON dbo.Employees (PositionId);
 GO

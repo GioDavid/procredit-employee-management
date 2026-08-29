@@ -1,39 +1,39 @@
 /*
     03_stored_procedures.sql
-    Stored procedure de consulta de empleados (FR-DB-04).
+    Employee query stored procedure (FR-DB-04).
 
-    Resuelve tanto el listado completo como la búsqueda filtrada por
-    departamento: si @Departamento es NULL o vacío devuelve todos los
-    empleados; en caso contrario filtra por coincidencia parcial del
-    nombre del departamento. Ver docs/SPEC.md (2.5, D-07).
+    Handles both the full listing and the department-filtered search:
+    if @Department is NULL or empty, all employees are returned;
+    otherwise the result is filtered by a partial match on the
+    department name. See docs/SPEC.md (2.5, D-07).
 */
 
 USE ProCreditRRHH;
 GO
 
-CREATE OR ALTER PROCEDURE dbo.usp_Empleado_Consultar
-    @Departamento NVARCHAR(100) = NULL
+CREATE OR ALTER PROCEDURE dbo.usp_Employee_Get
+    @Department NVARCHAR(100) = NULL
 AS
 BEGIN
     SET NOCOUNT ON;
 
     SELECT
-        e.EmpleadoId,
-        e.NumeroDocumento,
-        e.Nombres,
-        e.Apellidos,
-        e.Edad,
-        e.RemuneracionMensual,
-        e.DepartamentoId,
-        d.Nombre AS Departamento,
-        e.CargoId,
-        c.Nombre AS Cargo
-    FROM dbo.Empleado AS e
-        INNER JOIN dbo.Departamento AS d ON d.DepartamentoId = e.DepartamentoId
-        INNER JOIN dbo.Cargo        AS c ON c.CargoId = e.CargoId
-    WHERE @Departamento IS NULL
-       OR LTRIM(RTRIM(@Departamento)) = N''
-       OR d.Nombre LIKE N'%' + LTRIM(RTRIM(@Departamento)) + N'%'
-    ORDER BY e.Apellidos, e.Nombres;
+        e.EmployeeId,
+        e.DocumentNumber,
+        e.FirstNames,
+        e.LastNames,
+        e.Age,
+        e.MonthlySalary,
+        e.DepartmentId,
+        d.Name AS Department,
+        e.PositionId,
+        p.Name AS Position
+    FROM dbo.Employees AS e
+        INNER JOIN dbo.Departments AS d ON d.DepartmentId = e.DepartmentId
+        INNER JOIN dbo.Positions   AS p ON p.PositionId = e.PositionId
+    WHERE @Department IS NULL
+       OR LTRIM(RTRIM(@Department)) = N''
+       OR d.Name LIKE N'%' + LTRIM(RTRIM(@Department)) + N'%'
+    ORDER BY e.LastNames, e.FirstNames;
 END
 GO

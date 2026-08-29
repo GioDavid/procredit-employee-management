@@ -13,7 +13,7 @@ public sealed class AuthController(IAuthService authService) : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public ActionResult<LoginResponse> Login([FromBody] LoginRequest request)
     {
-        var response = authService.Autenticar(request);
+        var response = authService.Authenticate(request);
         return response is null
             ? Problem(statusCode: StatusCodes.Status401Unauthorized, detail: "Credenciales invalidas.")
             : Ok(response);

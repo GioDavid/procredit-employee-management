@@ -1,42 +1,52 @@
 # database/ — SQL Server
 
-Scripts de creación de la base de datos `ProCreditRRHH` (ver `docs/SPEC.md` §2).
+Scripts that create the `ProCreditRRHH` database (see `docs/SPEC.md` §2).
 
-| Script | Contenido |
+| Script | Contents |
 |---|---|
-| `01_create_database.sql` | Base de datos con collation `Latin1_General_CI_AI` (búsqueda insensible a mayúsculas y acentos) |
-| `02_create_tables.sql` | Tablas `Departamento`, `Cargo`, `Empleado` con PK IDENTITY, UNIQUE, CHECK, FK e índices |
-| `03_stored_procedures.sql` | `usp_Empleado_Consultar` (listado completo y búsqueda por departamento) |
-| `04_seed.sql` | Áreas y cargos del reto + empleados de ejemplo |
-| `99_run_all.sql` | Ejecuta los anteriores en orden (modo SQLCMD) |
+| `01_create_database.sql` | Database with collation `Latin1_General_CI_AI` (case- and accent-insensitive search) |
+| `02_create_tables.sql` | Tables `Departments`, `Positions`, `Employees` with PK IDENTITY, UNIQUE, CHECK, FK, and indexes |
+| `03_stored_procedures.sql` | `usp_Employee_Get` (full listing and search by department) |
+| `04_seed.sql` | Challenge areas and positions plus sample employees |
+| `99_run_all.sql` | Runs the scripts above in order (SQLCMD mode) |
 
-Todos los scripts son reejecutables: no fallan ni duplican datos si la base ya existe.
+All scripts are re-runnable: they do not fail or duplicate data if the English-named schema already exists.
 
-## Levantar SQL Server con Docker
+If a previous Spanish-named schema (`Departamento`, `Cargo`, `Empleado`, `usp_Empleado_Consultar`) is present, drop and recreate the database. Do not run these scripts as an in-place migration.
+
+## Start SQL Server with Docker
 
 ```bash
 docker run -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=ProCredit!2026" \
   -p 1433:1433 --name procredit-sql -d mcr.microsoft.com/mssql/server:2022-latest
 ```
 
-## Ejecutar los scripts
+## Run the scripts
 
 ```bash
 cd database
 sqlcmd -S localhost -U sa -P 'ProCredit!2026' -C -i 99_run_all.sql
 ```
 
-En SSMS o Azure Data Studio: abrir `99_run_all.sql`, activar el modo SQLCMD y ejecutar; o abrir los scripts `01`–`04` y ejecutarlos en orden.
+To drop and recreate a local database:
 
-## Comprobación rápida
+```bash
+cd database
+sqlcmd -S localhost -U sa -P 'ProCredit!2026' -C -Q "ALTER DATABASE ProCreditRRHH SET SINGLE_USER WITH ROLLBACK IMMEDIATE; DROP DATABASE ProCreditRRHH;"
+sqlcmd -S localhost -U sa -P 'ProCredit!2026' -C -i 99_run_all.sql
+```
+
+In SSMS or Azure Data Studio: open `99_run_all.sql`, enable SQLCMD mode, and execute; or open scripts `01`–`04` and run them in order.
+
+## Quick check
 
 ```sql
 USE ProCreditRRHH;
-EXEC dbo.usp_Empleado_Consultar;                    -- todos los empleados
-EXEC dbo.usp_Empleado_Consultar @Departamento = N'banca';  -- coincidencia parcial
+EXEC dbo.usp_Employee_Get;                           -- all employees
+EXEC dbo.usp_Employee_Get @Department = N'banca';    -- partial match
 ```
 
-Cadena de conexión para la API:
+Connection string for the API:
 
 ```
 Server=localhost,1433;Database=ProCreditRRHH;User Id=sa;Password=ProCredit!2026;TrustServerCertificate=True;

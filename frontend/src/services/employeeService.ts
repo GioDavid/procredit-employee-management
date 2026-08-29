@@ -1,21 +1,19 @@
 import { apiRequest } from "../api/client";
 import type { CreateEmployeeRequest } from "../interfaces/CreateEmployeeRequest";
-import type { Empleado } from "../interfaces/Empleado";
+import type { Employee } from "../interfaces/Employee";
 
-export async function listEmployees(
-  departamento?: string,
-): Promise<Empleado[]> {
+export async function listEmployees(department?: string): Promise<Employee[]> {
   const query =
-    departamento && departamento.trim().length > 0
-      ? `?departamento=${encodeURIComponent(departamento.trim())}`
+    department && department.trim().length > 0
+      ? `?department=${encodeURIComponent(department.trim())}`
       : "";
-  return apiRequest<Empleado[]>(`/api/empleados${query}`);
+  return apiRequest<Employee[]>(`/api/employees${query}`);
 }
 
 export async function createEmployee(
   request: CreateEmployeeRequest,
-): Promise<Empleado> {
-  return apiRequest<Empleado>("/api/empleados", {
+): Promise<Employee> {
+  return apiRequest<Employee>("/api/employees", {
     method: "POST",
     body: request,
   });

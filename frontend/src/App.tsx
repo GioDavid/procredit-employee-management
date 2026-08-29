@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import CssBaseline from '@mui/material/CssBaseline';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
+import { onUnauthorized } from './api/client';
 import { EmployeesPage } from './pages/EmployeesPage';
 import { LoginPage } from './pages/LoginPage';
 import { isAuthenticated } from './services/authService';
@@ -18,6 +19,8 @@ const theme = createTheme({
 
 function App() {
   const [authenticated, setAuthenticated] = useState(() => isAuthenticated());
+
+  useEffect(() => onUnauthorized(() => setAuthenticated(false)), []);
 
   return (
     <ThemeProvider theme={theme}>

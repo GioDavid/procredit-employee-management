@@ -65,7 +65,7 @@ export function NewEmployeeDialog({ open, onClose, onCreated }: NewEmployeeDialo
         setCargos(cargosList);
       })
       .catch((err: unknown) => {
-        if (cancelled) {
+        if (cancelled || (err instanceof ApiError && err.status === 401)) {
           return;
         }
         setCatalogError(err instanceof Error ? err.message : 'No se pudieron cargar los catálogos.');
@@ -155,6 +155,9 @@ export function NewEmployeeDialog({ open, onClose, onCreated }: NewEmployeeDialo
       setErrors({});
       onCreated();
     } catch (err) {
+      if (err instanceof ApiError && err.status === 401) {
+        return;
+      }
       if (err instanceof ApiError) {
         setSubmitError(err.detail || err.message);
       } else if (err instanceof Error) {

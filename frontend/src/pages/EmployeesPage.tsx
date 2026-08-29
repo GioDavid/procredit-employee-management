@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import Alert from '@mui/material/Alert';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
@@ -48,6 +48,7 @@ export function EmployeesPage({ onLogout }: EmployeesPageProps) {
   const [error, setError] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
+  const loadGeneration = useRef(0);
 
   const handleAuthFailure = useCallback(
     (err: unknown) => {
@@ -63,23 +64,38 @@ export function EmployeesPage({ onLogout }: EmployeesPageProps) {
 
   const loadEmployees = useCallback(
     async (departamento?: string) => {
+      const generation = ++loadGeneration.current;
       setLoading(true);
       setError('');
       try {
         const data = await listEmployees(departamento || undefined);
+        if (generation !== loadGeneration.current) {
+          return;
+        }
         setEmployees(data);
       } catch (err) {
+        if (generation !== loadGeneration.current) {
+          return;
+        }
         if (handleAuthFailure(err)) {
           return;
         }
         setError(err instanceof Error ? err.message : 'No se pudieron cargar los empleados.');
         setEmployees([]);
       } finally {
-        setLoading(false);
+        if (generation === loadGeneration.current) {
+          setLoading(false);
+        }
       }
     },
     [handleAuthFailure],
   );
+
+  useEffect(() => {
+    return () => {
+      loadGeneration.current += 1;
+    };
+  }, []);
 
   useEffect(() => {
     let cancelled = false;

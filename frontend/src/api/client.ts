@@ -24,6 +24,24 @@ export function clearToken(): void {
   localStorage.removeItem(TOKEN_KEY);
 }
 
+type UnauthorizedListener = () => void;
+
+const unauthorizedListeners = new Set<UnauthorizedListener>();
+
+export function onUnauthorized(listener: UnauthorizedListener): () => void {
+  unauthorizedListeners.add(listener);
+  return () => {
+    unauthorizedListeners.delete(listener);
+  };
+}
+
+function notifyUnauthorized(): void {
+  clearToken();
+  for (const listener of unauthorizedListeners) {
+    listener();
+  }
+}
+
 function getBaseUrl(): string {
   const baseUrl = import.meta.env.VITE_API_URL;
   if (!baseUrl || typeof baseUrl !== 'string') {
@@ -81,7 +99,11 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
   });
 
   if (!response.ok) {
-    throw await parseError(response);
+    const error = await parseError(response);
+    if (error.status === 401 && auth) {
+      notifyUnauthorized();
+    }
+    throw error;
   }
 
   if (response.status === 204) {

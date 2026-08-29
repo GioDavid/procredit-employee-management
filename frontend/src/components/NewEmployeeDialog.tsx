@@ -53,8 +53,6 @@ export function NewEmployeeDialog({ open, onClose, onCreated }: NewEmployeeDialo
     }
 
     let cancelled = false;
-    setCatalogError('');
-    setLoadingCatalogs(true);
 
     Promise.all([getDepartamentos(), getCargos()])
       .then(([deps, cargosList]) => {

@@ -43,11 +43,13 @@ function formatCurrency(value: number): string {
 export function EmployeesPage({ onLogout }: EmployeesPageProps) {
   const [employees, setEmployees] = useState<Empleado[]>([]);
   const [departamentos, setDepartamentos] = useState<Catalog[]>([]);
-  const [departamentoFilter, setDepartamentoFilter] = useState(ALL_DEPARTMENTS);
+  const [departamentoFilter, setDepartamentoFilter] =
+    useState(ALL_DEPARTMENTS);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
+
   const loadGeneration = useRef(0);
 
   const handleAuthFailure = useCallback(
@@ -57,6 +59,7 @@ export function EmployeesPage({ onLogout }: EmployeesPageProps) {
         onLogout();
         return true;
       }
+
       return false;
     },
     [onLogout],
@@ -65,22 +68,33 @@ export function EmployeesPage({ onLogout }: EmployeesPageProps) {
   const loadEmployees = useCallback(
     async (departamento?: string) => {
       const generation = ++loadGeneration.current;
+
       setLoading(true);
       setError('');
+
       try {
-        const data = await listEmployees(departamento || undefined);
+        const data = await listEmployees(departamento);
+
         if (generation !== loadGeneration.current) {
           return;
         }
+
         setEmployees(data);
       } catch (err) {
         if (generation !== loadGeneration.current) {
           return;
         }
+
         if (handleAuthFailure(err)) {
           return;
         }
-        setError(err instanceof Error ? err.message : 'No se pudieron cargar los empleados.');
+
+        setError(
+          err instanceof Error
+            ? err.message
+            : 'No se pudieron cargar los empleados.',
+        );
+
         setEmployees([]);
       } finally {
         if (generation === loadGeneration.current) {
@@ -102,18 +116,26 @@ export function EmployeesPage({ onLogout }: EmployeesPageProps) {
 
     getDepartamentos()
       .then((deps) => {
-        if (!cancelled) {
-          setDepartamentos(deps);
+        if (cancelled) {
+          return;
         }
+
+        setDepartamentos(deps);
       })
       .catch((err: unknown) => {
         if (cancelled) {
           return;
         }
+
         if (handleAuthFailure(err)) {
           return;
         }
-        setError(err instanceof Error ? err.message : 'No se pudieron cargar los departamentos.');
+
+        setError(
+          err instanceof Error
+            ? err.message
+            : 'No se pudieron cargar los departamentos.',
+        );
       });
 
     return () => {
@@ -122,8 +144,65 @@ export function EmployeesPage({ onLogout }: EmployeesPageProps) {
   }, [handleAuthFailure]);
 
   useEffect(() => {
-    void loadEmployees(departamentoFilter || undefined);
-  }, [departamentoFilter, loadEmployees]);
+    const generation = ++loadGeneration.current;
+    let cancelled = false;
+
+    async function fetchEmployees() {
+      try {
+        const data = await listEmployees(
+          departamentoFilter || undefined,
+        );
+
+        if (
+          cancelled ||
+          generation !== loadGeneration.current
+        ) {
+          return;
+        }
+
+        setEmployees(data);
+        setError('');
+      } catch (err) {
+        if (
+          cancelled ||
+          generation !== loadGeneration.current
+        ) {
+          return;
+        }
+
+        if (handleAuthFailure(err)) {
+          return;
+        }
+
+        setError(
+          err instanceof Error
+            ? err.message
+            : 'No se pudieron cargar los empleados.',
+        );
+
+        setEmployees([]);
+      } finally {
+        if (
+          !cancelled &&
+          generation === loadGeneration.current
+        ) {
+          setLoading(false);
+        }
+      }
+    }
+
+    void fetchEmployees();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [departamentoFilter, handleAuthFailure]);
+
+  function handleDepartmentChange(value: string) {
+    setLoading(true);
+    setError('');
+    setDepartamentoFilter(value);
+  }
 
   function handleLogout() {
     logout();
@@ -133,23 +212,36 @@ export function EmployeesPage({ onLogout }: EmployeesPageProps) {
   function handleCreated() {
     setDialogOpen(false);
     setSuccessMessage('Empleado creado correctamente.');
-    void loadEmployees(departamentoFilter || undefined);
+
+    void loadEmployees(
+      departamentoFilter || undefined,
+    );
   }
 
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: 'grey.50' }}>
       <AppBar position="static" elevation={1}>
         <Toolbar>
-          <Typography variant="h6" sx={{ flexGrow: 1 }}>
+          <Typography
+            variant="h6"
+            sx={{ flexGrow: 1 }}
+          >
             ProCredit — Empleados
           </Typography>
-          <Button color="inherit" onClick={handleLogout}>
+
+          <Button
+            color="inherit"
+            onClick={handleLogout}
+          >
             Cerrar sesión
           </Button>
         </Toolbar>
       </AppBar>
 
-      <Container maxWidth="lg" sx={{ py: 3 }}>
+      <Container
+        maxWidth="lg"
+        sx={{ py: 3 }}
+      >
         <Box
           sx={{
             display: 'flex',
@@ -160,42 +252,72 @@ export function EmployeesPage({ onLogout }: EmployeesPageProps) {
             mb: 3,
           }}
         >
-          <FormControl sx={{ minWidth: 260 }} size="small">
-            <InputLabel id="filtro-departamento-label">Departamento</InputLabel>
+          <FormControl
+            sx={{ minWidth: 260 }}
+            size="small"
+          >
+            <InputLabel id="filtro-departamento-label">
+              Departamento
+            </InputLabel>
+
             <Select
               labelId="filtro-departamento-label"
               label="Departamento"
               value={departamentoFilter}
-              onChange={(e) => setDepartamentoFilter(e.target.value)}
+              onChange={(event) =>
+                handleDepartmentChange(event.target.value)
+              }
             >
-              <MenuItem value={ALL_DEPARTMENTS}>Todos</MenuItem>
+              <MenuItem value={ALL_DEPARTMENTS}>
+                Todos
+              </MenuItem>
+
               {departamentos.map((dep) => (
-                <MenuItem key={dep.id} value={dep.nombre}>
+                <MenuItem
+                  key={dep.id}
+                  value={dep.nombre}
+                >
                   {dep.nombre}
                 </MenuItem>
               ))}
             </Select>
           </FormControl>
 
-          <Button variant="contained" onClick={() => setDialogOpen(true)}>
+          <Button
+            variant="contained"
+            onClick={() => setDialogOpen(true)}
+          >
             Nuevo empleado
           </Button>
         </Box>
 
         {error ? (
-          <Alert severity="error" sx={{ mb: 2 }}>
+          <Alert
+            severity="error"
+            sx={{ mb: 2 }}
+          >
             {error}
           </Alert>
         ) : null}
 
         {loading ? (
-          <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'center',
+              py: 8,
+            }}
+          >
             <CircularProgress />
           </Box>
         ) : null}
 
-        {!loading && !error && employees.length === 0 ? (
-          <Alert severity="info">No se encontraron empleados.</Alert>
+        {!loading &&
+        !error &&
+        employees.length === 0 ? (
+          <Alert severity="info">
+            No se encontraron empleados.
+          </Alert>
         ) : null}
 
         {!loading && employees.length > 0 ? (
@@ -206,22 +328,48 @@ export function EmployeesPage({ onLogout }: EmployeesPageProps) {
                   <TableCell>Documento</TableCell>
                   <TableCell>Nombres</TableCell>
                   <TableCell>Apellidos</TableCell>
-                  <TableCell align="right">Edad</TableCell>
-                  <TableCell>Departamento</TableCell>
+                  <TableCell align="right">
+                    Edad
+                  </TableCell>
+                  <TableCell>
+                    Departamento
+                  </TableCell>
                   <TableCell>Cargo</TableCell>
-                  <TableCell align="right">Remuneración mensual</TableCell>
+                  <TableCell align="right">
+                    Remuneración mensual
+                  </TableCell>
                 </TableRow>
               </TableHead>
+
               <TableBody>
                 {employees.map((empleado) => (
-                  <TableRow key={empleado.empleadoId} hover>
-                    <TableCell>{empleado.numeroDocumento}</TableCell>
-                    <TableCell>{empleado.nombres}</TableCell>
-                    <TableCell>{empleado.apellidos}</TableCell>
-                    <TableCell align="right">{empleado.edad}</TableCell>
-                    <TableCell>{empleado.departamento}</TableCell>
-                    <TableCell>{empleado.cargo}</TableCell>
-                    <TableCell align="right">{formatCurrency(empleado.remuneracionMensual)}</TableCell>
+                  <TableRow
+                    key={empleado.empleadoId}
+                    hover
+                  >
+                    <TableCell>
+                      {empleado.numeroDocumento}
+                    </TableCell>
+                    <TableCell>
+                      {empleado.nombres}
+                    </TableCell>
+                    <TableCell>
+                      {empleado.apellidos}
+                    </TableCell>
+                    <TableCell align="right">
+                      {empleado.edad}
+                    </TableCell>
+                    <TableCell>
+                      {empleado.departamento}
+                    </TableCell>
+                    <TableCell>
+                      {empleado.cargo}
+                    </TableCell>
+                    <TableCell align="right">
+                      {formatCurrency(
+                        empleado.remuneracionMensual,
+                      )}
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -240,9 +388,15 @@ export function EmployeesPage({ onLogout }: EmployeesPageProps) {
         open={Boolean(successMessage)}
         autoHideDuration={4000}
         onClose={() => setSuccessMessage('')}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'center',
+        }}
       >
-        <Alert severity="success" onClose={() => setSuccessMessage('')}>
+        <Alert
+          severity="success"
+          onClose={() => setSuccessMessage('')}
+        >
           {successMessage}
         </Alert>
       </Snackbar>
